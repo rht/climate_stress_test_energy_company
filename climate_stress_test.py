@@ -52,7 +52,6 @@ scenario_list = [
     'No transition (hot house world)']
 scenario = widgets.Dropdown(options=scenario_list)
 display(scenario)
-
 scenario_plot = widgets.Output()
 display(scenario_plot)
 with scenario_plot:
@@ -102,6 +101,41 @@ with scenario_plot:
     plt.legend()
     plt.show()
 
+# For cost evolution visualization
+montecarlo_plot = widgets.Output()
+averaged_montecarlo_plot = widgets.Output()
+def averaged_normal(mean, sigma, mcpaths=1000):
+    return np.mean([np.random.normal(mean, sigma) for i in range(mcpaths)])
+
+custom_mcpaths = 1
+# evolve_cg() and evolve_cb() duplicate the code to calculate cost evolution
+# inside calculate_utility(). They can be refactored later if necessary.
+def evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial):
+    omega_cg = averaged_normal(omega_hat, sigma_omega, custom_mcpaths)
+    ut_greens = [averaged_normal(0, sigma_u, custom_mcpaths) for i in range(len(Ts))]
+    c_greens = [cg_initial]
+    for j, t in enumerate(Ts):
+        ut = ut_greens[j]
+        cg = c_greens[-1]
+        # Wright's law
+        try:
+            ut_minus1 = ut_greens[-2]
+        except IndexError:
+            ut_minus1 = 0.0
+        cg_next = cg * math.exp(-omega_cg + ut + rho_cg * ut_minus1)
+        c_greens.append(cg_next)
+    return c_greens
+
+def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
+    epsilon_cb = [averaged_normal(0, sigma_cb, custom_mcpaths) for i in range(len(Ts))]
+    c_browns = [cb_initial]
+    for j, t in enumerate(Ts):
+        cb = c_browns[-1]
+        m_cb = kappa / (1 - phi_cb)
+        cb_next = cb * math.exp((1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j])
+        c_browns.append(cb_next)
+    return c_browns
+
 # Brown params
 params_oil = dict(
     kappa = 0.342,
@@ -139,17 +173,6 @@ brown_params.value = params_oil  # default
 display(brown_params)
 with brown_params:
     display(brown_params.value)
-def dropdown_brown_eventhandler(change):
-    brown_params.clear_output()
-    if change.new == 'oil':
-        brown_params.value = params_oil
-    elif change.new == 'coal':
-        brown_params.value = params_coal
-    else:  # gas
-        brown_params.value = params_gas
-    with brown_params:
-        display(brown_params.value)
-dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
 
 # Green params
 params_solar = dict(
@@ -176,6 +199,64 @@ green_params.value = params_solar  # default
 display(green_params)
 with green_params:
     display(green_params.value)
+
+# Cost evolution, brown params, and green params event handler
+def plot_cost_evolution():
+    np.random.seed(1337)
+    # brown
+    brown_tech = dropdown_brown.value
+    sigma_cb = brown_params.value['sigma_cb']
+    cb_initial = brown_params.value['cb_initial']
+    kappa = brown_params.value['kappa']
+    phi_cb = brown_params.value['phi_cb']
+    # green
+    green_tech = dropdown_green.value
+    omega_hat = green_params.value['omega_hat']
+    sigma_omega = green_params.value['sigma_omega']
+    sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
+    cg_initial = green_params.value['cg_initial']
+    all_c_browns = []
+    all_c_greens = []
+    montecarlo_plot.clear_output()
+    averaged_montecarlo_plot.clear_output()
+    with montecarlo_plot:
+        for i in range(5):
+            c_browns = np.array(evolve_cb(sigma_cb, cb_initial, kappa, phi_cb))
+            all_c_browns.append(c_browns)
+            plt.plot(full_Ts, c_browns, label=f'{brown_tech} {i + 1}')
+        for i in range(5):
+            c_greens = np.array(evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial))
+            all_c_greens.append(c_greens)
+            plt.plot(full_Ts, c_greens, label=f'{green_tech} {i + 1}')
+        plt.xlabel('Time (years)')
+        plt.ylabel('Cost ($/GJ)')
+        plt.title('Figure 2: Evolution of Unit Cost of Energy')
+        plt.legend()
+        plt.show()
+    with averaged_montecarlo_plot:
+        ave_c_browns = np.mean(np.array(all_c_browns), axis=0)
+        plt.plot(full_Ts, ave_c_browns, label=brown_tech)
+        ave_c_greens = np.mean(np.array(all_c_greens), axis=0)
+        plt.plot(full_Ts, ave_c_greens, label=green_tech)
+        plt.xlabel('Time (years)')
+        plt.ylabel('Cost ($/GJ)')
+        plt.title('Figure 3: Averaged evolution of energy cost')
+        plt.legend()
+        plt.show()
+
+def dropdown_brown_eventhandler(change):
+    brown_params.clear_output()
+    if change.new == 'oil':
+        brown_params.value = params_oil
+    elif change.new == 'coal':
+        brown_params.value = params_coal
+    else:  # gas
+        brown_params.value = params_gas
+    with brown_params:
+        display(brown_params.value)
+    plot_cost_evolution()
+dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
+
 def dropdown_green_eventhandler(change):
     green_params.clear_output()
     if change.new == 'solar':
@@ -184,6 +265,7 @@ def dropdown_green_eventhandler(change):
         green_params.value = params_wind
     with green_params:
         display(green_params.value)
+    plot_cost_evolution()
 dropdown_green.observe(dropdown_green_eventhandler, names='value')
 
 # Brown energy percentage
@@ -276,6 +358,10 @@ omega_hat_multiplier = widgets.IntSlider(
 display(omega_hat_multiplier)
 # TODO use omega_hat_multiplier
 
+# Display cost evolution here
+display(montecarlo_plot)
+display(averaged_montecarlo_plot)
+plot_cost_evolution()
 
 # Model
 def calculate_cost_g(cg, x, delta_E, Eg):
@@ -432,18 +518,15 @@ def do_optimize(fn, xs0):
     result = minimize(fn, xs0, bounds=bounds, method=method)
     return result
 
-def averaged_normal(mean, sigma):
-    return np.mean([np.random.normal(mean, sigma) for i in range(1000)])
-
 # Plot
-plot_output = widgets.Output()
+simulation_plot = widgets.Output()
 
 # Run button
 btn = widgets.Button(description='Run')
 display(btn)
 def btn_eventhandler(obj):
-    plot_output.clear_output()
-    with plot_output:
+    simulation_plot.clear_output()
+    with simulation_plot:
         # For deterministic result
         np.random.seed(1337)
         omega_cg = averaged_normal(green_params.value['omega_hat'], green_params.value['sigma_omega'])
@@ -459,4 +542,4 @@ def btn_eventhandler(obj):
         plt.show()
 btn.on_click(btn_eventhandler)
 
-display(plot_output)
+display(simulation_plot)
