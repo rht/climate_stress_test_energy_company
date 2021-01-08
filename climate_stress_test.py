@@ -306,7 +306,6 @@ alpha_b_multiplier = widgets.IntSlider(
     layout=widgets.Layout(width='80%')
 )
 display(alpha_b_multiplier)
-# TODO use alpha_b_multiplier
 
 # alpha_g multiplier
 display(widgets.Label(
@@ -327,7 +326,6 @@ alpha_g_multiplier = widgets.IntSlider(
     layout=widgets.Layout(width='80%')
 )
 display(alpha_g_multiplier)
-# TODO use alpha_g_multiplier
 
 # omega_hat
 display(widgets.Label(
@@ -365,12 +363,14 @@ plot_cost_evolution()
 
 # Model
 def calculate_cost_g(cg, x, delta_E, Eg):
-    return cg * x * delta_E + green_params.value['alpha_g'] * (Eg ** beta)
+    alpha_g = green_params.value['alpha_g'] * alpha_g_multiplier.value
+    return cg * x * delta_E + alpha_g * (Eg ** beta)
 
 def calculate_cost_b(cb, tax, x, delta_E, Eb):
+    alpha_b = brown_params.value['alpha_b'] * alpha_b_multiplier.value
     return (
         (cb + tax) * (1 - x) * delta_E +
-        brown_params.value['alpha_b'] * (Eb ** beta) +
+        alpha_b * (Eb ** beta) +
         tax * Eb
     )
 
