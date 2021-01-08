@@ -187,12 +187,18 @@ def dropdown_green_eventhandler(change):
 dropdown_green.observe(dropdown_green_eventhandler, names='value')
 
 # Brown energy percentage
+display(widgets.Label(
+    value='Does the brown energy company that you would like to '
+          'subject to the climate stress test already have a small '
+          'green portfolio or is it a fully brown company?'
+
+))
 style = {'description_width': 'initial'}
 brown_energy_percentage = widgets.IntSlider(
     min=0,
     max=100,
     step=25,
-    description='Brown energy percentage:',
+    description='Brown energy percentage (%%):',
     value=75,
     style=style,
     layout=widgets.Layout(width='50%')
