@@ -211,7 +211,7 @@ def plot_cost_evolution():
     phi_cb = brown_params.value['phi_cb']
     # green
     green_tech = dropdown_green.value
-    omega_hat = green_params.value['omega_hat']
+    omega_hat = green_params.value['omega_hat'] * omega_hat_multiplier.value / 100
     sigma_omega = green_params.value['sigma_omega']
     sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
     cg_initial = green_params.value['cg_initial']
@@ -354,7 +354,9 @@ omega_hat_multiplier = widgets.IntSlider(
     layout=widgets.Layout(width='80%')
 )
 display(omega_hat_multiplier)
-# TODO use omega_hat_multiplier
+def omega_hat_multiplier_eventhandler(change):
+    plot_cost_evolution()
+omega_hat_multiplier.observe(omega_hat_multiplier_eventhandler, names='value')
 
 # Display cost evolution here
 display(montecarlo_plot)
@@ -539,7 +541,8 @@ def btn_eventhandler(obj):
     with simulation_plot:
         # For deterministic result
         np.random.seed(1337)
-        omega_cg = averaged_normal(green_params.value['omega_hat'], green_params.value['sigma_omega'])
+        omega_hat = green_params.value['omega_hat'] * omega_hat_multiplier.value / 100
+        omega_cg = averaged_normal(omega_hat, green_params.value['sigma_omega'])
         sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
         ut_greens = [averaged_normal(0, sigma_u) for i in range(len(Ts))]
         epsilon_cb = [averaged_normal(0, brown_params.value['sigma_cb']) for i in range(len(Ts))]
