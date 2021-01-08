@@ -102,34 +102,6 @@ with scenario_plot:
     plt.legend()
     plt.show()
 
-# Green params
-params_solar = dict(
-    omega_hat=0.303,
-    sigma_omega=0.047,
-    sigma_eta=0.093,
-    cg_initial=70 / 3.6,
-    alpha_g=14 / 8760 / 0.0036
-)
-params_wind = dict(
-    omega_hat=0.158,
-    sigma_omega=0.045,
-    sigma_eta=0.103,
-    cg_initial=55 / 3.6,
-    alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
-)
-dropdown_green = widgets.Dropdown(options=['solar', 'wind'])
-green_params = widgets.Output()
-green_params.value = params_solar  # default
-def dropdown_green_eventhandler(change):
-    green_params.clear_output()
-    if change.new == 'solar':
-        green_params.value = params_solar
-    else:  # wind
-        green_params.value = params_wind
-    with green_params:
-        display(green_params.value)
-dropdown_green.observe(dropdown_green_eventhandler, names='value')
-
 # Brown params
 params_oil = dict(
     kappa = 0.342,
@@ -158,8 +130,12 @@ params_gas = dict(
     alpha_b = 4.21  # $/GJ (DOE only)
 )
 dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'])
+display(dropdown_brown)
 brown_params = widgets.Output()
 brown_params.value = params_oil  # default
+display(brown_params)
+with brown_params:
+    display(brown_params.value)
 def dropdown_brown_eventhandler(change):
     brown_params.clear_output()
     if change.new == 'oil':
@@ -172,20 +148,37 @@ def dropdown_brown_eventhandler(change):
         display(brown_params.value)
 dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
 
-# Collecting the widgets together
-dropdowns = widgets.HBox(
-    [dropdown_green, dropdown_brown]
+# Green params
+params_solar = dict(
+    omega_hat=0.303,
+    sigma_omega=0.047,
+    sigma_eta=0.093,
+    cg_initial=70 / 3.6,
+    alpha_g=14 / 8760 / 0.0036
 )
-display(dropdowns)
-params_widget = widgets.HBox(
-    [green_params, brown_params]
+params_wind = dict(
+    omega_hat=0.158,
+    sigma_omega=0.045,
+    sigma_eta=0.103,
+    cg_initial=55 / 3.6,
+    alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
 )
-display(params_widget)
+dropdown_green = widgets.Dropdown(options=['solar', 'wind'])
+display(dropdown_green)
+green_params = widgets.Output()
+green_params.value = params_solar  # default
+display(green_params)
 with green_params:
     display(green_params.value)
-with brown_params:
-    # default to oil
-    display(brown_params.value)
+def dropdown_green_eventhandler(change):
+    green_params.clear_output()
+    if change.new == 'solar':
+        green_params.value = params_solar
+    else:  # wind
+        green_params.value = params_wind
+    with green_params:
+        display(green_params.value)
+dropdown_green.observe(dropdown_green_eventhandler, names='value')
 
 # Brown energy percentage
 style = {'description_width': 'initial'}
