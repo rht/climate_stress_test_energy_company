@@ -522,6 +522,9 @@ def do_optimize(fn, xs0):
 simulation_plot = widgets.Output()
 
 # Run button
+display(widgets.Label(
+    value='To generate the outputs of your climate stress test of the energy company given your selected policy and technology scenario press "Run":'
+))
 btn = widgets.Button(description='Run')
 display(btn)
 def btn_eventhandler(obj):
