@@ -318,8 +318,8 @@ display(widgets.Label(
 ))
 alpha_g_multiplier = widgets.IntSlider(
     min=0,
-    max=150,  # TODO find the max
-    step=25,
+    max=1000,
+    step=50,
     description='Maintenance cost of green energy relative to $\\alpha_g^{default}$ in percentages (%):',
     value=100,
     style=style,
