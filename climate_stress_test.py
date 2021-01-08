@@ -129,6 +129,9 @@ params_gas = dict(
     chi = 0.05545,
     alpha_b = 4.21  # $/GJ (DOE only)
 )
+display(widgets.Label(
+    value='What type of brown energy company would you like to subject to a climate stress test?'
+))
 dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'])
 display(dropdown_brown)
 brown_params = widgets.Output()
@@ -163,6 +166,9 @@ params_wind = dict(
     cg_initial=55 / 3.6,
     alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
 )
+display(widgets.Label(
+    value='What type of green energy does the brown energy company invest (if it decides to invest in green) in the climate stress test?'
+))
 dropdown_green = widgets.Dropdown(options=['solar', 'wind'])
 display(dropdown_green)
 green_params = widgets.Output()
