@@ -198,7 +198,7 @@ brown_energy_percentage = widgets.IntSlider(
     min=0,
     max=100,
     step=25,
-    description='Brown energy percentage (%%):',
+    description='Brown energy percentage (%):',
     value=75,
     style=style,
     layout=widgets.Layout(width='50%')
