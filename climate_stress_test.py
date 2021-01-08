@@ -35,17 +35,68 @@ rho = 0.01
 Tstart = 2020
 DeltaT = 30
 Ts = list(range(2021, 2021 + DeltaT))
+full_Ts = [2020] + Ts
 delta_t_tax = 30
 t_tax = 2020 + delta_t_tax
 xs0 = [min(1, initial_x) for i in range(DeltaT)]
 
 # Scenario
-scenario = widgets.Dropdown(options=[
+scenario_list = [
     'Orderly transition',
     'Disorderly transition (late)',
     'Too little, too late transition',
-    'No transition (hot house world)'])
+    'No transition (hot house world)']
+scenario = widgets.Dropdown(options=scenario_list)
 display(scenario)
+
+scenario_plot = widgets.Output()
+display(scenario_plot)
+with scenario_plot:
+    # Orderly
+    plt.plot(
+        full_Ts,
+        [i * 10 for i in range(len(full_Ts))],
+        label=scenario_list[0],
+        color=u'#2ca02c'  # green
+    )
+    # Disorderly
+    taxes = [0]
+    for t in Ts:
+        if t > 2030:
+            taxes.append(taxes[-1] + 35)
+        else:
+            taxes.append(0)
+    plt.plot(
+        full_Ts,
+        taxes,
+        label=scenario_list[1],
+        color=u'#1f77b4'  # blue
+    )
+    # TLTL
+    taxes = [0]
+    for t in Ts:
+        if t > 2030:
+            taxes.append(taxes[-1] + 10)
+        else:
+            taxes.append(0)
+    plt.plot(
+        full_Ts,
+        taxes,
+        label=scenario_list[2],
+        color=u'#ff7f0e'  # orange
+    )
+    # Hot house
+    plt.plot(
+        full_Ts,
+        [0] * len(full_Ts),
+        label=scenario_list[3],
+        color=u'#d62728'  # red
+    )
+    plt.ylabel('USD/t $CO_2$')
+    plt.xlabel('Time (years)')
+    plt.title('Figure 1: Carbon tax development across scenarios')
+    plt.legend()
+    plt.show()
 
 # Green params
 params_solar = dict(
@@ -277,7 +328,6 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, p
             return out
         fig, ax = plt.subplots(figsize=(9, 5))
         fig.subplots_adjust(right=0.77)
-        full_Ts = [2020] + Ts
         ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({dropdown_green.value})'], colors=['brown', 'green'])
         ax.set_title(scenario.value)
         ax.set_ylabel('Energy (GJ)')
