@@ -239,13 +239,43 @@ alpha_g_multiplier = widgets.IntSlider(
     min=0,
     max=150,  # TODO find the max
     step=25,
-    description='Maintenance cost of green energy relative to $\alpha_g^{default}$ in percentages (%):',
+    description='Maintenance cost of green energy relative to $\\alpha_g^{default}$ in percentages (%):',
     value=100,
     style=style,
     layout=widgets.Layout(width='80%')
 )
 display(alpha_g_multiplier)
 # TODO use alpha_g_multiplier
+
+# omega_hat
+display(widgets.Label(
+    value='What expectations does the energy company have '
+          'regarding the rate at which investing in green energy '
+))
+display(widgets.Label(
+    value='becomes cheaper over time? Please select the technology '
+          'scenario on the slider by specifying the rate of '
+))
+display(widgets.Label(
+    value='decay $\hat{\omega}$ of the initial investment '
+          'costs associated to your choice of green energy '
+))
+display(widgets.Label(
+    value='$c_g$ (relative to the current decay value '
+          '$\hat{\omega}^{default}$)'
+))
+omega_hat_multiplier = widgets.IntSlider(
+    min=0,
+    max=150,  # TODO find the max
+    step=25,
+    description='Investment cost of green energy relative to $c_g^{default}$ in percentages (%):',
+    value=100,
+    style=style,
+    layout=widgets.Layout(width='80%')
+)
+display(omega_hat_multiplier)
+# TODO use omega_hat_multiplier
+
 
 # Model
 def calculate_cost_g(cg, x, delta_E, Eg):
