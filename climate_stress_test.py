@@ -493,6 +493,8 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, p
         out = -mean_U
         if not plot_Evst:
             return out
+
+        # Else plot E vs t
         fig, ax = plt.subplots(figsize=(9, 5))
         fig.subplots_adjust(right=0.77)
         ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({dropdown_green.value})'], colors=['brown', 'green'])
@@ -536,11 +538,13 @@ def btn_eventhandler(obj):
         sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
         ut_greens = [averaged_normal(0, sigma_u) for i in range(len(Ts))]
         epsilon_cb = [averaged_normal(0, brown_params.value['sigma_cb']) for i in range(len(Ts))]
-        print(scenario.value)
         fn = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax)
         result = do_optimize(fn, xs0)
 
         fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
+
+        fn_with_plot(xs0)
+        plt.figure()
         fn_with_plot(result.x)
         plt.show()
 btn.on_click(btn_eventhandler)
