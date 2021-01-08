@@ -224,6 +224,28 @@ alpha_b_multiplier = widgets.IntSlider(
     layout=widgets.Layout(width='80%')
 )
 display(alpha_b_multiplier)
+# TODO use alpha_b_multiplier
+
+# alpha_g multiplier
+display(widgets.Label(
+    value='How much does the brown energy company expect its '
+          'cost of maintaining its stocks of green energy to be '
+))
+display(widgets.Label(
+    value='in the future (relative to its current maintenance '
+          'cost of green energy $\\alpha_g^{default}$)?'
+))
+alpha_g_multiplier = widgets.IntSlider(
+    min=0,
+    max=150,  # TODO find the max
+    step=25,
+    description='Maintenance cost of green energy relative to $\alpha_g^{default}$ in percentages (%):',
+    value=100,
+    style=style,
+    layout=widgets.Layout(width='80%')
+)
+display(alpha_g_multiplier)
+# TODO use alpha_g_multiplier
 
 # Model
 def calculate_cost_g(cg, x, delta_E, Eg):
