@@ -385,6 +385,7 @@ def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0):
 def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, plot_tax=False, plot_cost=False):
     def _calc_U(xs):
         Us = []
+        Vs = []
         for i in range(1):
             full_xs = [initial_x] + list(xs)
             # Initialize first element of all the time series at t = 2020
@@ -485,8 +486,10 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, p
             # Rupert short paper equation 12
             # Since mu is a scale, it doesn't affect the final result, but we
             # set it anyway.
-            U = math.log(mu * sum(numerators) / sum(denominators))
+            sum_numerators = sum(numerators)
+            U = math.log(mu * sum_numerators / sum(denominators))
             Us.append(U)
+            Vs.append(sum_numerators)
 
         mean_U = np.mean(Us)
         # Reverse the sign because we only have `minimize` function
@@ -495,6 +498,9 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, p
             return out
 
         # Else plot E vs t
+        # First, print out the value of numerators
+        print(np.mean(Vs))
+
         fig, ax = plt.subplots(figsize=(9, 5))
         fig.subplots_adjust(right=0.77)
         ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({dropdown_green.value})'], colors=['brown', 'green'])
@@ -543,8 +549,14 @@ def btn_eventhandler(obj):
 
         fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
 
+        print('Output 1 of your climate stress test: Value of the energy company given its current '
+              'business strategy of directing 10% of its investments towards green energy projects:')
         fn_with_plot(xs0)
+        plt.show()
+
         plt.figure()
+        print('Output 3 of your climate stress test: Value of the energy company given its optimally '
+              'adapted business strategy:')
         fn_with_plot(result.x)
         plt.show()
 btn.on_click(btn_eventhandler)
