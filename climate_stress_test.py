@@ -363,11 +363,11 @@ plot_cost_evolution()
 
 # Model
 def calculate_cost_g(cg, x, delta_E, Eg):
-    alpha_g = green_params.value['alpha_g'] * alpha_g_multiplier.value
+    alpha_g = green_params.value['alpha_g'] * alpha_g_multiplier.value / 100
     return cg * x * delta_E + alpha_g * (Eg ** beta)
 
 def calculate_cost_b(cb, tax, x, delta_E, Eb):
-    alpha_b = brown_params.value['alpha_b'] * alpha_b_multiplier.value
+    alpha_b = brown_params.value['alpha_b'] * alpha_b_multiplier.value / 100
     return (
         (cb + tax) * (1 - x) * delta_E +
         alpha_b * (Eb ** beta) +
