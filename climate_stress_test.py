@@ -552,12 +552,16 @@ def btn_eventhandler(obj):
         print('Output 1 of your climate stress test: Value of the energy company given its current '
               'business strategy of directing 10% of its investments towards green energy projects:')
         fn_with_plot(xs0)
+        print('Output 2 of your climate stress test: Figure 4 shows the portfolio of the energy '
+              'company over time given its current business strategy of directing 10% of its '
+              'investments towards green energy projects:')
         plt.show()
 
-        plt.figure()
         print('Output 3 of your climate stress test: Value of the energy company given its optimally '
               'adapted business strategy:')
         fn_with_plot(result.x)
+        print('Output 4 of your climate stress test: Figure 5 shows the energy company transition '
+              'towards a green business model (if at all) given its optimally adapted business strategy:')
         plt.show()
 btn.on_click(btn_eventhandler)
 
