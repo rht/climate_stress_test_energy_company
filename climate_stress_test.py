@@ -41,6 +41,10 @@ t_tax = 2020 + delta_t_tax
 xs0 = [min(1, initial_x) for i in range(DeltaT)]
 
 # Scenario
+scenario_description = widgets.Label(
+    value='Which carbon tax scenario from Figure 1 '
+          'below would you like to consider for the climate stress test?')
+display(scenario_description)
 scenario_list = [
     'Orderly transition',
     'Disorderly transition (late)',
