@@ -14,7 +14,7 @@
 # ---
 
 # + cellView="form"
-#@title Climate Stress Test Energy Company
+#@title Climate Stress Test of Energy Company
 import math
 
 import ipywidgets as widgets
