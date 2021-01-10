@@ -470,7 +470,7 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
 
         # Else plot E vs t
         # First, print out the value of numerators
-        print('$', int(np.mean(Vs)))
+        print('$', round(np.mean(Vs) / 1000_000_000, 2), 'billions')
 
         fig, ax = plt.subplots(figsize=(9, 5))
         fig.subplots_adjust(right=0.77)
