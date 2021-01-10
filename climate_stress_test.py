@@ -525,7 +525,7 @@ def btn_eventhandler(obj):
               'business strategy of directing 10% of its investments towards green energy projects:')
         fn_with_plot(xs0)
         plt.title('Figure 4: ' + scenario.value)
-        print('Output 2 of your climate stress test: Figure 4 shows the portfolio of the energy '
+        print('Output 2: Figure 4 shows the portfolio of the energy '
               'company over time given its current business strategy of directing 10% of its '
               'investments towards green energy projects:')
         plt.show()
