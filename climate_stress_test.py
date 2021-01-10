@@ -41,6 +41,7 @@ t_tax = 2020 + delta_t_tax
 xs0 = [min(1, initial_x) for i in range(DeltaT)]
 
 # Scenario
+display(widgets.HTML("<h1>Select transition scenario:</h1>"))
 scenario_description = widgets.Label(
     value='Which carbon tax scenario from Figure 1 '
           'below would you like to consider for the climate stress test?')
@@ -135,6 +136,8 @@ def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
         cb_next = cb * math.exp((1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j])
         c_browns.append(cb_next)
     return c_browns
+
+display(widgets.HTML("<h1>Select type of brown & green energy company:</h1>"))
 
 # Brown params
 params_oil = dict(
@@ -286,6 +289,8 @@ brown_energy_percentage = widgets.IntSlider(
     layout=widgets.Layout(width='50%')
 )
 display(brown_energy_percentage)
+
+display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 
 # alpha_b multiplier
 display(widgets.Label(
