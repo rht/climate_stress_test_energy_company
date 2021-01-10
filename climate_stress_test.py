@@ -43,7 +43,7 @@ xs0 = [min(1, initial_x) for i in range(DeltaT)]
 # Scenario
 display(widgets.HTML("<h1>Select transition scenario:</h1>"))
 scenario_description = widgets.Label(
-    value='Which carbon tax scenario from Figure 1 '
+    value='1. Which carbon tax scenario from Figure 1 '
           'below would you like to consider for the climate stress test?')
 display(scenario_description)
 scenario_list = [
@@ -167,7 +167,7 @@ params_gas = dict(
     alpha_b = 4.21  # $/GJ (DOE only)
 )
 display(widgets.Label(
-    value='What type of brown energy company would you like to subject to a climate stress test?'
+    value='2. What type of brown energy company would you like to subject to a climate stress test?'
 ))
 dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'])
 display(dropdown_brown)
@@ -193,7 +193,7 @@ params_wind = dict(
     alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
 )
 display(widgets.Label(
-    value='What type of green energy does the brown energy company invest (if it decides to invest in green) in the climate stress test?'
+    value='3. What type of green energy does the brown energy company invest (if it decides to invest in green) in the climate stress test?'
 ))
 dropdown_green = widgets.Dropdown(options=['solar', 'wind'])
 display(dropdown_green)
@@ -273,7 +273,7 @@ dropdown_green.observe(dropdown_green_eventhandler, names='value')
 
 # Brown energy percentage
 display(widgets.Label(
-    value='Does the brown energy company that you would like to '
+    value='4. Does the brown energy company that you would like to '
           'subject to the climate stress test already have a small '
           'green portfolio or is it a fully brown company?'
 
@@ -294,7 +294,7 @@ display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 
 # alpha_b multiplier
 display(widgets.Label(
-    value='How much does the brown energy company expect its '
+    value='5. How much does the brown energy company expect its '
           'cost of maintaining its stock of brown energy to be '
 ))
 display(widgets.Label(
@@ -314,7 +314,7 @@ display(alpha_b_multiplier)
 
 # alpha_g multiplier
 display(widgets.Label(
-    value='How much does the brown energy company expect its '
+    value='6. How much does the brown energy company expect its '
           'cost of maintaining its stocks of green energy to be '
 ))
 display(widgets.Label(
@@ -334,7 +334,7 @@ display(alpha_g_multiplier)
 
 # omega_hat
 display(widgets.Label(
-    value='What expectations does the energy company have '
+    value='7. What expectations does the energy company have '
           'regarding the rate at which investing in green energy '
 ))
 display(widgets.Label(
