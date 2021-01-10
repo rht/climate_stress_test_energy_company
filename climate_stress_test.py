@@ -395,7 +395,7 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
                 delta_E = delta_Es[-1]
                 x = full_xs[j + 1]
 
-                assert abs(E_total - (Eg + Eb)) < 1e-9
+                assert abs(E_total - (Eg + Eb)) / E_total < 1e-9
                 # Doyne equation 18
                 E_green_next = Eg * (1 - dg) + x * delta_E
                 # Doyne equation 19
