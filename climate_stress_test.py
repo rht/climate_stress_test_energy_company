@@ -39,6 +39,7 @@ full_Ts = [2020] + Ts
 delta_t_tax = 30
 t_tax = 2020 + delta_t_tax
 xs0 = [min(1, initial_x) for i in range(DeltaT)]
+total_energy = 200_000_000  # GJ
 
 # Scenario
 display(widgets.HTML("<h1>Select transition scenario:</h1>"))
@@ -361,10 +362,10 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
             # Initialize first element of all the time series at t = 2020
             brown_fraction = brown_energy_percentage.value / 100
             # Time series of green energy
-            E_greens = [(1 - brown_fraction) * 200]  # GJ/yr, useful energy at t0
+            E_greens = [(1 - brown_fraction) * total_energy]  # GJ/yr, useful energy at t0
             # Time series of cost of green energy
             c_greens = [green_params.value['cg_initial']]
-            E_browns = [brown_fraction * 200]  # GJ/yr, useful energy at t0
+            E_browns = [brown_fraction * total_energy]  # GJ/yr, useful energy at t0
             # Time series of cost of brown energy
             c_browns = [brown_params.value['cb_initial']]
             E_total = E_greens[0] + E_browns[0]
