@@ -51,7 +51,7 @@ scenario_list = [
     'Disorderly transition (late)',
     'Too little, too late transition',
     'No transition (hot house world)']
-scenario = widgets.Dropdown(options=scenario_list)
+scenario = widgets.Dropdown(options=scenario_list, value='No transition (hot house world)')
 display(scenario)
 scenario_plot = widgets.Output()
 display(scenario_plot)
@@ -171,7 +171,7 @@ params_gas = dict(
 display(widgets.Label(
     value='2. What type of brown energy company would you like to subject to a climate stress test?'
 ))
-dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'])
+dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'], value='coal')
 display(dropdown_brown)
 brown_params = widgets.Output()
 brown_params.value = params_oil  # default
