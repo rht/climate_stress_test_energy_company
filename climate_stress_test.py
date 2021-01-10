@@ -173,7 +173,7 @@ dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'])
 display(dropdown_brown)
 brown_params = widgets.Output()
 brown_params.value = params_oil  # default
-display(brown_params)
+# display(brown_params)
 with brown_params:
     display(brown_params.value)
 
@@ -199,7 +199,7 @@ dropdown_green = widgets.Dropdown(options=['solar', 'wind'])
 display(dropdown_green)
 green_params = widgets.Output()
 green_params.value = params_solar  # default
-display(green_params)
+# display(green_params)
 with green_params:
     display(green_params.value)
 
