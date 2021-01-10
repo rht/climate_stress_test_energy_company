@@ -28,7 +28,6 @@ dg = 0.05  # DEVIATION
 db = 0.06  # dg < db  # DEVIATION
 initial_x = 0.1
 rho_cg = 0.19
-psi = 24.39  # $/tons
 beta = 1
 mu = 0.5
 rho = 0.01
@@ -411,12 +410,7 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
                 E_brown_next = Eb * (1 - db) + (1 - x) * delta_E
                 delta_E_next = dg * E_green_next + db * E_brown_next
 
-                if scenario.value == 'DEFAULT':
-                    if t >= t_tax:
-                        tax = psi * brown_params.value['chi']
-                    else:
-                        tax = 0
-                elif scenario.value == 'Orderly transition':
+                if scenario.value == 'Orderly transition':
                     # Allen 2020 page 11
                     # First scenario of NGFS (orderly).
                     # "That price increases by about $10/ton of CO2 per year until 2050"
