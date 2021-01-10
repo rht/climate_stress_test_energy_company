@@ -302,16 +302,12 @@ display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 # omega_hat
 # Empty line for a breather
 display(widgets.Label('\n\n'))
-display(widgets.Label(
-    value='5. What expectations does the energy company have '
-          'regarding the rate at which investing in green energy '
-))
-display(widgets.Label(
-    value='becomes cheaper over time? Please select the rate of '
-          'decay $\hat{\omega}$ of the initial investment costs $c_g$ '
-))
-display(widgets.Label(
-    value='relative to its default value $\hat{\omega}^{default}$.'
+display(widgets.HTMLMath(
+    '5. What expectations does the energy company have '
+    'regarding the rate at which investing in green energy '
+    'becomes cheaper over time? Please select the rate of '
+    'decay $\hat{\omega}$ of the initial investment costs $c_g$ '
+    'relative to its default value $\hat{\omega}^{default}$.'
 ))
 omega_hat_multiplier = widgets.IntSlider(
     min=0,
