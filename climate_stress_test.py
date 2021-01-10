@@ -520,7 +520,7 @@ def btn_eventhandler(obj):
 
         fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
 
-        print('Output 1 of your climate stress test: Value of the energy company given its current '
+        print('Output 1: Value of the energy company given its current '
               'business strategy of directing 10% of its investments towards green energy projects:')
         fn_with_plot(xs0)
         plt.title('Figure 4: ' + scenario.value)
@@ -529,11 +529,11 @@ def btn_eventhandler(obj):
               'investments towards green energy projects:')
         plt.show()
 
-        print('Output 3 of your climate stress test: Value of the energy company given its optimally '
+        print('Output 3: Value of the energy company given its optimally '
               'adapted business strategy:')
         fn_with_plot(result.x)
         plt.title('Figure 5: ' + scenario.value)
-        print('Output 4 of your climate stress test: Figure 5 shows the energy company transition '
+        print('Output 4: Figure 5 shows the energy company transition '
               'towards a green business model (if at all) given its optimally adapted business strategy:')
         plt.show()
 btn.on_click(btn_eventhandler)
