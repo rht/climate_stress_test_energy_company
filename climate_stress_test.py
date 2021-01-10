@@ -500,6 +500,7 @@ def do_optimize(fn, xs0):
 simulation_plot = widgets.Output()
 
 # Run button
+display(widgets.HTML("<h1>Press run:</h1>"))
 display(widgets.Label(
     value='To generate the outputs of the climate stress test of your energy company given your selected transition and technology scenario, press "Run":'
 ))
