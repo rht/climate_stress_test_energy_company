@@ -24,8 +24,8 @@ from scipy.optimize import minimize
 from scipy.optimize import Bounds
 
 # Hardcoded params
-dg = 0.03  # DEVIATION
-db = 0.04  # dg < db  # DEVIATION
+dg = 0.04  # DEVIATION
+db = 0.05  # dg < db  # DEVIATION
 initial_x = 0.1
 rho_cg = 0.19
 psi = 24.39  # $/tons
