@@ -137,6 +137,8 @@ def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
         c_browns.append(cb_next)
     return c_browns
 
+# Empty line for a breather
+display(widgets.Label('\n\n'))
 display(widgets.HTML("<h1>Select type of brown & green energy company:</h1>"))
 
 # Brown params
@@ -192,6 +194,8 @@ params_wind = dict(
     cg_initial=55 / 3.6,
     alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
 )
+# Empty line for a breather
+display(widgets.Label('\n\n'))
 display(widgets.Label(
     value='3. What type of green energy does the brown energy company invest (if it decides to invest in green) in the climate stress test?'
 ))
@@ -272,6 +276,8 @@ def dropdown_green_eventhandler(change):
 dropdown_green.observe(dropdown_green_eventhandler, names='value')
 
 # Brown energy percentage
+# Empty line for a breather
+display(widgets.Label('\n\n'))
 display(widgets.Label(
     value='4. Does the brown energy company that you would like to '
           'subject to the climate stress test already have a small '
@@ -313,6 +319,8 @@ alpha_b_multiplier = widgets.IntSlider(
 display(alpha_b_multiplier)
 
 # alpha_g multiplier
+# Empty line for a breather
+display(widgets.Label('\n\n'))
 display(widgets.Label(
     value='6. How much does the brown energy company expect its '
           'cost of maintaining its stocks of green energy to be '
@@ -333,6 +341,8 @@ alpha_g_multiplier = widgets.IntSlider(
 display(alpha_g_multiplier)
 
 # omega_hat
+# Empty line for a breather
+display(widgets.Label('\n\n'))
 display(widgets.Label(
     value='7. What expectations does the energy company have '
           'regarding the rate at which investing in green energy '
