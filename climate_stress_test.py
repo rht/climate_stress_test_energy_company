@@ -298,53 +298,11 @@ display(brown_energy_percentage)
 
 display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 
-# alpha_b multiplier
-display(widgets.Label(
-    value='5. How much does the brown energy company expect its '
-          'cost of maintaining its stock of brown energy to be '
-))
-display(widgets.Label(
-    value='in the future (relative to its current maintenance '
-          'cost of brown energy $\\alpha_b^{default}$)?'
-))
-alpha_b_multiplier = widgets.IntSlider(
-    min=0,
-    max=150,  # TODO find the max
-    step=25,
-    description='Maintenance cost of brown energy relative to $\\alpha_b^{default}$ in percentages (%):',
-    value=100,
-    style=style,
-    layout=widgets.Layout(width='80%')
-)
-display(alpha_b_multiplier)
-
-# alpha_g multiplier
-# Empty line for a breather
-display(widgets.Label('\n\n'))
-display(widgets.Label(
-    value='6. How much does the brown energy company expect its '
-          'cost of maintaining its stocks of green energy to be '
-))
-display(widgets.Label(
-    value='in the future (relative to its current maintenance '
-          'cost of green energy $\\alpha_g^{default}$)?'
-))
-alpha_g_multiplier = widgets.IntSlider(
-    min=0,
-    max=1000,
-    step=50,
-    description='Maintenance cost of green energy relative to $\\alpha_g^{default}$ in percentages (%):',
-    value=100,
-    style=style,
-    layout=widgets.Layout(width='80%')
-)
-display(alpha_g_multiplier)
-
 # omega_hat
 # Empty line for a breather
 display(widgets.Label('\n\n'))
 display(widgets.Label(
-    value='7. What expectations does the energy company have '
+    value='5. What expectations does the energy company have '
           'regarding the rate at which investing in green energy '
 ))
 display(widgets.Label(
@@ -380,11 +338,11 @@ plot_cost_evolution()
 
 # Model
 def calculate_cost_g(cg, x, delta_E, Eg):
-    alpha_g = green_params.value['alpha_g'] * alpha_g_multiplier.value / 100
+    alpha_g = green_params.value['alpha_g']
     return cg * x * delta_E + alpha_g * (Eg ** beta)
 
 def calculate_cost_b(cb, tax, x, delta_E, Eb):
-    alpha_b = brown_params.value['alpha_b'] * alpha_b_multiplier.value / 100
+    alpha_b = brown_params.value['alpha_b']
     return (
         (cb + tax) * (1 - x) * delta_E +
         alpha_b * (Eb ** beta) +
