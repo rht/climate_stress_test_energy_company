@@ -174,7 +174,7 @@ display(widgets.Label(
 dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'], value='coal')
 display(dropdown_brown)
 brown_params = widgets.Output()
-brown_params.value = params_oil  # default
+brown_params.value = params_coal  # default
 # display(brown_params)
 with brown_params:
     display(brown_params.value)
