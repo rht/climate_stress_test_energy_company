@@ -524,21 +524,29 @@ def btn_eventhandler(obj):
 
         fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
 
-        print('Output 1: Value of the energy company given its current '
-              'business strategy of directing 10% of its investments towards green energy projects:')
+        display(widgets.HTML(
+            '<b>Output 1:</b> Value of the energy company given its current '
+            'business strategy of directing 10% of its investments towards green energy projects:'
+        ))
         fn_with_plot(xs0)
         plt.title('Figure 4: ' + scenario.value)
-        print('Output 2: Figure 4 shows the portfolio of the energy '
-              'company over time given its current business strategy of directing 10% of its '
-              'investments towards green energy projects:')
+        display(widgets.HTML(
+            '<b>Output 2:</b> Figure 4 shows the portfolio of the energy '
+            'company over time given its current business strategy of directing 10% of its '
+            'investments towards green energy projects:'
+        ))
         plt.show()
 
-        print('Output 3: Value of the energy company given its optimally '
-              'adapted business strategy:')
+        display(widgets.HTML(
+            '<b>Output 3:</b> Value of the energy company given its optimally '
+            'adapted business strategy:'
+        ))
         fn_with_plot(result.x)
         plt.title('Figure 5: ' + scenario.value)
-        print('Output 4: Figure 5 shows the energy company transition '
-              'towards a green business model (if at all) given its optimally adapted business strategy:')
+        display(widgets.HTML(
+            '<b>Output 4:</b> Figure 5 shows the energy company transition '
+            'towards a green business model (if at all) given its optimally adapted business strategy:'
+        ))
         plt.show()
 btn.on_click(btn_eventhandler)
 
