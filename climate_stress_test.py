@@ -329,7 +329,7 @@ omega_hat_multiplier = widgets.IntSlider(
     description='Rate of decay relative to default (%):',
     value=100,
     style=style,
-    layout=widgets.Layout(width='80%')
+    layout=widgets.Layout(width='60%')
 )
 display(omega_hat_multiplier)
 def omega_hat_multiplier_eventhandler(change):
