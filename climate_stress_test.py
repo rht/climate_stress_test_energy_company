@@ -500,7 +500,7 @@ simulation_plot = widgets.Output()
 
 # Run button
 display(widgets.Label(
-    value='To generate the outputs of your climate stress test of the energy company given your selected policy and technology scenario press "Run":'
+    value='To generate the outputs of the climate stress test of your energy company given your selected transition and technology scenario, press "Run":'
 ))
 btn = widgets.Button(description='Run')
 display(btn)
