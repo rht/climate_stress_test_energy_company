@@ -302,7 +302,20 @@ display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 # omega_hat
 # Empty line for a breather
 display(widgets.Label('\n\n'))
-display(widgets.HTMLMath(
+display(widgets.HTML(
+    '''
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+    '''
+    '<script type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>'
     '5. What expectations does the energy company have '
     'regarding the rate at which investing in green energy '
     'becomes cheaper over time? Please select the rate of '
