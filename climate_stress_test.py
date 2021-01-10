@@ -302,7 +302,7 @@ display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 # omega_hat
 # Empty line for a breather
 display(widgets.Label('\n\n'))
-display(widgets.HTML(
+display(widgets.HTMLMath(
     '''
 <script>
 MathJax = {
