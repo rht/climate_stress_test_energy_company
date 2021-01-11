@@ -457,11 +457,8 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
                 numerators.append(numerator)
                 denominator = math.exp(-rho * (t - Tstart)) * (cg_next * x + (cb_next + tax) * (1 - x)) * delta_E_next
                 denominators.append(denominator)
-            # Rupert short paper equation 12
-            # Since mu is a scale, it doesn't affect the final result, but we
-            # set it anyway.
             sum_numerators = sum(numerators)
-            U = math.log(mu * sum_numerators / sum(denominators))
+            U = math.log(sum_numerators / sum(denominators))
             Us.append(U)
             Vs.append(sum_numerators)
 
