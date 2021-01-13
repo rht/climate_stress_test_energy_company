@@ -166,7 +166,6 @@ with scenario_plot:
     plt.show()
 
 # For cost evolution visualization
-montecarlo_plot = widgets.Output()
 averaged_montecarlo_plot = widgets.Output()
 def averaged_normal(mean, sigma, mcpaths=1000):
     return np.mean([np.random.normal(mean, sigma) for i in range(mcpaths)])
@@ -216,22 +215,13 @@ def plot_cost_evolution():
     cg_initial = green_params.value['cg_initial']
     all_c_browns = []
     all_c_greens = []
-    montecarlo_plot.clear_output()
     averaged_montecarlo_plot.clear_output()
-    with montecarlo_plot:
-        for i in range(5):
-            c_browns = np.array(evolve_cb(sigma_cb, cb_initial, kappa, phi_cb))
-            all_c_browns.append(c_browns)
-            plt.plot(full_Ts, c_browns, label=f'{brown_tech} {i + 1}')
-        for i in range(5):
-            c_greens = np.array(evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial))
-            all_c_greens.append(c_greens)
-            plt.plot(full_Ts, c_greens, label=f'{green_tech} {i + 1}')
-        plt.xlabel('Time (years)')
-        plt.ylabel('Cost ($/GJ)')
-        plt.title('Figure 2: Evolution of Unit Cost of Energy')
-        plt.legend()
-        plt.show()
+    for i in range(5):
+        c_browns = np.array(evolve_cb(sigma_cb, cb_initial, kappa, phi_cb))
+        all_c_browns.append(c_browns)
+    for i in range(5):
+        c_greens = np.array(evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial))
+        all_c_greens.append(c_greens)
     with averaged_montecarlo_plot:
         ave_c_browns = np.mean(np.array(all_c_browns), axis=0)
         plt.plot(full_Ts, ave_c_browns, label=brown_tech)
@@ -239,7 +229,7 @@ def plot_cost_evolution():
         plt.plot(full_Ts, ave_c_greens, label=green_tech)
         plt.xlabel('Time (years)')
         plt.ylabel('Cost ($/GJ)')
-        plt.title('Figure 3: Averaged evolution of energy cost')
+        plt.title('Figure 2: Averaged evolution of energy cost')
         plt.legend()
         plt.show()
 
@@ -296,7 +286,6 @@ def omega_hat_multiplier_eventhandler(change):
 omega_hat_multiplier.observe(omega_hat_multiplier_eventhandler, names='value')
 
 # Display cost evolution here
-display(montecarlo_plot)
 display(averaged_montecarlo_plot)
 plot_cost_evolution()
 
@@ -486,9 +475,9 @@ def btn_eventhandler(obj):
             'business strategy of directing 10% of its investments towards green energy projects:'
         ))
         fn_with_plot(xs0)
-        plt.title('Figure 4: ' + scenario.value)
+        plt.title('Figure 3: ' + scenario.value)
         display(widgets.HTML(
-            '<b>Output 2:</b> Figure 4 shows the portfolio of the energy '
+            '<b>Output 2:</b> Figure 3 shows the portfolio of the energy '
             'company over time given its current business strategy of directing 10% of its '
             'investments towards green energy projects:'
         ))
@@ -499,9 +488,9 @@ def btn_eventhandler(obj):
             'adapted business strategy:'
         ))
         fn_with_plot(result.x)
-        plt.title('Figure 5: ' + scenario.value)
+        plt.title('Figure 4: ' + scenario.value)
         display(widgets.HTML(
-            '<b>Output 4:</b> Figure 5 shows the energy company transition '
+            '<b>Output 4:</b> Figure 4 shows the energy company transition '
             'towards a green business model (if at all) given its optimally adapted business strategy:'
         ))
         plt.show()
