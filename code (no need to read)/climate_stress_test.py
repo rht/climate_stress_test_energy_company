@@ -106,9 +106,7 @@ with green_params:
 display(widgets.Label('\n\n'))
 # Scenario
 display(widgets.HTML("<h1>Select transition scenario:</h1>"))
-display(widgets.HTML("""
-2. Which carbon tax scenario from Figure 1 below would you like to consider for the climate stress test? (We assume the transition scenario consists solely of the carbon tax scenario. Figure 1 shows by how many dollars the carbon tax per ton of CO2 emissions increases per year.)
-"""))
+display(widgets.HTML("2. Which carbon tax scenario from Figure 1 below would you like to consider for the climate stress test?"))
 scenario_list = [
     'Orderly transition',
     'Disorderly transition (late)',
@@ -118,6 +116,9 @@ scenario = widgets.Dropdown(options=scenario_list, value='No transition (hot hou
 display(scenario)
 scenario_plot = widgets.Output()
 display(scenario_plot)
+display(widgets.HTML(
+    "We assume the transition scenario consists solely of the carbon tax scenario. Figure 1 shows by how many dollars the carbon tax per ton of CO2 emissions increases per year."
+))
 with scenario_plot:
     # Orderly
     plt.plot(
