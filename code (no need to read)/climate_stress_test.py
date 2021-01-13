@@ -39,6 +39,8 @@ delta_t_tax = 30
 t_tax = 2020 + delta_t_tax
 xs0 = [min(1, initial_x) for i in range(DeltaT)]
 total_energy = 200_000_000  # GJ
+green_tech = 'solar'
+brown_energy_percentage = 75
 
 # Scenario
 display(widgets.HTML("<h1>Select transition scenario:</h1>"))
@@ -194,7 +196,6 @@ params_wind = dict(
     cg_initial=55 / 3.6,
     alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
 )
-green_tech = 'solar'
 green_params = widgets.Output()
 green_params.value = params_solar  # default
 # display(green_params)
@@ -256,27 +257,6 @@ def dropdown_brown_eventhandler(change):
         display(brown_params.value)
     plot_cost_evolution()
 dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
-
-# Brown energy percentage
-# Empty line for a breather
-display(widgets.Label('\n\n'))
-display(widgets.Label(
-    value='4. Does the brown energy company that you would like to '
-          'subject to the climate stress test already have a small '
-          'green portfolio or is it a fully brown company?'
-
-))
-style = {'description_width': 'initial'}
-brown_energy_percentage = widgets.IntSlider(
-    min=0,
-    max=100,
-    step=25,
-    description='Brown energy percentage (%):',
-    value=75,
-    style=style,
-    layout=widgets.Layout(width='50%')
-)
-display(brown_energy_percentage)
 
 display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 
@@ -350,7 +330,7 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
         for i in range(1):
             full_xs = [initial_x] + list(xs)
             # Initialize first element of all the time series at t = 2020
-            brown_fraction = brown_energy_percentage.value / 100
+            brown_fraction = brown_energy_percentage / 100
             # Time series of green energy
             E_greens = [(1 - brown_fraction) * total_energy]  # GJ/yr, useful energy at t0
             # Time series of cost of green energy
