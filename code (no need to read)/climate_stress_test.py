@@ -277,7 +277,7 @@ MathJax = {
 </script>
     '''
     '<script type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>'
-    '5. What expectations does the energy company have '
+    '3. What expectations does the energy company have '
     'regarding the rate at which investing in green energy '
     'becomes cheaper over time? Please select the rate of '
     'decay $\hat{\omega}$ of the initial investment costs $c_g$ '
