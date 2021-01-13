@@ -171,37 +171,47 @@ with scenario_plot:
 
 # For cost evolution visualization
 averaged_montecarlo_plot = widgets.Output()
-def averaged_normal(mean, sigma, mcpaths=1000):
-    return np.mean([np.random.normal(mean, sigma) for i in range(mcpaths)])
-
-custom_mcpaths = 1
-# evolve_cg() and evolve_cb() duplicate the code to calculate cost evolution
-# inside calculate_utility(). They can be refactored later if necessary.
+MCPATHS = widgets.Output()
+MCPATHS.value = 5
 def evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial):
-    omega_cg = averaged_normal(omega_hat, sigma_omega, custom_mcpaths)
-    ut_greens = [averaged_normal(0, sigma_u, custom_mcpaths) for i in range(len(Ts))]
-    c_greens = [cg_initial]
-    for j, t in enumerate(Ts):
-        ut = ut_greens[j]
-        cg = c_greens[-1]
-        # Wright's law
-        try:
-            ut_minus1 = ut_greens[-2]
-        except IndexError:
-            ut_minus1 = 0.0
-        cg_next = cg * math.exp(-omega_cg + ut + rho_cg * ut_minus1)
-        c_greens.append(cg_next)
-    return c_greens
+    # Rupert appendix p38
+    # We generate the cost evolution for every monte carlo
+    # path, and then we average the path for every point in
+    # time.
+    c_greens_all = []
+    for n in range(MCPATHS.value):
+        omega_cg = np.random.normal(omega_hat, sigma_omega)
+        ut_greens = np.random.normal(0, sigma_u, len(Ts))
+        c_greens = [cg_initial]
+        for j in range(len(Ts)):
+            ut = ut_greens[j]
+            cg = c_greens[-1]
+            # Wright's law
+            if (j - 1) == -1:
+                ut_minus1 = 0
+            else:
+                ut_minus1 = ut_greens[j - 1]
+            cg_next = cg * math.exp(-omega_cg + ut + rho_cg * ut_minus1)
+            c_greens.append(cg_next)
+        c_greens_all.append(c_greens)
+    c_greens_ave = np.mean(c_greens_all, axis=0)
+    return c_greens_ave
 
 def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
-    epsilon_cb = [averaged_normal(0, sigma_cb, custom_mcpaths) for i in range(len(Ts))]
-    c_browns = [cb_initial]
-    for j, t in enumerate(Ts):
-        cb = c_browns[-1]
-        m_cb = kappa / (1 - phi_cb)
-        cb_next = cb * math.exp((1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j])
-        c_browns.append(cb_next)
-    return c_browns
+    c_browns_all = []
+    for n in range(MCPATHS.value):
+        epsilon_cb = np.random.normal(0, sigma_cb, len(Ts))
+        c_browns = [cb_initial]
+        for j in range(len(Ts)):
+            cb = c_browns[-1]
+            # AR(1)
+            # Equation 25 of Rupert appendix
+            m_cb = kappa / (1 - phi_cb)
+            cb_next = cb * math.exp((1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j])
+            c_browns.append(cb_next)
+        c_browns_all.append(c_browns)
+    c_browns_ave = np.mean(c_browns_all, axis=0)
+    return c_browns_ave
 
 # Cost evolution, brown params, and green params event handler
 def plot_cost_evolution():
@@ -217,19 +227,12 @@ def plot_cost_evolution():
     sigma_omega = green_params.value['sigma_omega']
     sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
     cg_initial = green_params.value['cg_initial']
-    all_c_browns = []
-    all_c_greens = []
+    MCPATHS.value = 5
     averaged_montecarlo_plot.clear_output()
-    for i in range(5):
-        c_browns = np.array(evolve_cb(sigma_cb, cb_initial, kappa, phi_cb))
-        all_c_browns.append(c_browns)
-    for i in range(5):
-        c_greens = np.array(evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial))
-        all_c_greens.append(c_greens)
     with averaged_montecarlo_plot:
-        ave_c_browns = np.mean(np.array(all_c_browns), axis=0)
+        ave_c_browns = evolve_cb(sigma_cb, cb_initial, kappa, phi_cb)
         plt.plot(full_Ts, ave_c_browns, label=brown_tech)
-        ave_c_greens = np.mean(np.array(all_c_greens), axis=0)
+        ave_c_greens = evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial)
         plt.plot(full_Ts, ave_c_greens, label=green_tech)
         plt.xlabel('Time (years)')
         plt.ylabel('Cost ($/GJ)')
@@ -315,7 +318,7 @@ def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0):
         max((p0 * Eg - cost_g + p0 * Eb - cost_b), 0)
     )
 
-def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, initial=False):
+def calculate_utility(c_greens, c_browns, t_tax, plot_Evst=False, initial=False):
     def _calc_U(xs):
         Us = []
         Vs = []
@@ -325,11 +328,7 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, i
             brown_fraction = brown_energy_percentage / 100
             # Time series of green energy
             E_greens = [(1 - brown_fraction) * total_energy]  # GJ/yr, useful energy at t0
-            # Time series of cost of green energy
-            c_greens = [green_params.value['cg_initial']]
             E_browns = [brown_fraction * total_energy]  # GJ/yr, useful energy at t0
-            # Time series of cost of brown energy
-            c_browns = [brown_params.value['cb_initial']]
             E_total = E_greens[0] + E_browns[0]
             # Time series of total depreciation of energy
             delta_Es = [dg * E_greens[0] + db * E_browns[0]]
@@ -350,10 +349,9 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, i
 
             for j, t in enumerate(Ts):
                 Eg = E_greens[-1]
-                cg = c_greens[-1]
-                ut = ut_greens[j]
+                cg = c_greens[j]
                 Eb = E_browns[-1]
-                cb = c_browns[-1]
+                cb = c_browns[j]
                 delta_E = delta_Es[-1]
                 x = full_xs[j + 1]
 
@@ -389,22 +387,11 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, i
                     if t > 2030:
                         tax += 10.0 * brown_params.value['chi']
 
-                # Wright's law
-                try:
-                    ut_minus1 = ut_greens[-2]
-                except IndexError:
-                    ut_minus1 = 0
-                cg_next = cg * math.exp(-omega_cg + ut + rho_cg * ut_minus1)
-                # AR(1)
-                phi_cb = brown_params.value['phi_cb']
-                kappa = brown_params.value['kappa']
-                m_cb = kappa / (1 - phi_cb)
-                cb_next = cb * math.exp((1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j])
+                cg_next = c_greens[j + 1]
+                cb_next = c_browns[j + 1]
 
                 E_greens.append(E_green_next)
-                c_greens.append(cg_next)
                 E_browns.append(E_brown_next)
-                c_browns.append(cb_next)
                 delta_Es.append(delta_E_next)
                 taxes.append(tax)
                 numerator = calculate_numerator(t - Tstart, x, delta_E_next, E_green_next, E_brown_next, cg_next, cb_next, tax, price0)
@@ -473,18 +460,28 @@ def btn_eventhandler(obj):
         # For deterministic result
         np.random.seed(1337)
         omega_hat = green_params.value['omega_hat'] * omega_hat_multiplier.value / 100
-        omega_cg = averaged_normal(omega_hat, green_params.value['sigma_omega'])
+        sigma_omega = green_params.value['sigma_omega']
         sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
-        ut_greens = [averaged_normal(0, sigma_u) for i in range(len(Ts))]
-        epsilon_cb = [averaged_normal(0, brown_params.value['sigma_cb']) for i in range(len(Ts))]
-        fn = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax)
+        cg_initial = green_params.value['cg_initial']
+
+        sigma_cb = brown_params.value['sigma_cb']
+        cb_initial = brown_params.value['cb_initial']
+        kappa = brown_params.value['kappa']
+        phi_cb = brown_params.value['phi_cb']
+
+        MCPATHS.value = 1000
+
+        c_greens = evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial)
+        c_browns = evolve_cb(sigma_cb, cb_initial, kappa, phi_cb)
+
+        fn = calculate_utility(c_greens, c_browns, t_tax)
         result = do_optimize(fn, xs0)
 
         display(widgets.HTML(
             '<b>Output 1:</b> Value of the energy company given its current '
             'business strategy of directing 10% of its investments towards green energy projects:'
         ))
-        fn_with_plot_initial = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True, initial=True)
+        fn_with_plot_initial = calculate_utility(c_greens, c_browns, t_tax, plot_Evst=True, initial=True)
         fn_with_plot_initial(xs0)
         plt.title('Figure 3: ' + scenario.value)
         display(widgets.HTML(
@@ -501,7 +498,7 @@ def btn_eventhandler(obj):
             '<b>Output 3:</b> Value of the energy company given its optimally '
             'adapted business strategy:'
         ))
-        fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
+        fn_with_plot = calculate_utility(c_greens, c_browns, t_tax, plot_Evst=True)
         fn_with_plot(result.x)
         plt.title('Figure 4: ' + scenario.value)
         display(widgets.HTML(
