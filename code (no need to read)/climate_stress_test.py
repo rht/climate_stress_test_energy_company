@@ -273,9 +273,9 @@ MathJax = {
     'relative to its default value $\hat{\omega}^{default}$.'
 ))
 omega_hat_multiplier = widgets.IntSlider(
-    min=0,
-    max=150,
-    step=25,
+    min=10,
+    max=130,
+    step=10,
     description='Rate of decay relative to default (%):',
     value=100,
     style=style,
