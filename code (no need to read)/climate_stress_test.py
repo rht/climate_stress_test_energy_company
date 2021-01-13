@@ -275,6 +275,7 @@ MathJax = {
     'decay $\hat{\omega}$ of the initial investment costs $c_g$ '
     'relative to its default value $\hat{\omega}^{default}$.'
 ))
+style = {'description_width': 'initial'}
 omega_hat_multiplier = widgets.IntSlider(
     min=10,
     max=130,
