@@ -487,9 +487,11 @@ def btn_eventhandler(obj):
             '<b>Output 2:</b> Figure 3 shows the portfolio of the energy '
             'company over time given its current business strategy of directing 10% of its '
             'investments towards green energy projects:'
-            "<br> * The 'current' (black line) represents the investment percentage in green energy under the <b>current business model</b>. This percentage is assumed to be 10%."
         ))
         plt.show()
+        display(widgets.HTML(
+            "* The 'current' (black line) represents the investment percentage in green energy under the <b>current business model</b>. This percentage is assumed to be 10%."
+        ))
 
         display(widgets.HTML(
             '<b>Output 3:</b> Value of the energy company given its optimally '
@@ -501,10 +503,12 @@ def btn_eventhandler(obj):
         display(widgets.HTML(
             '<b>Output 4:</b> Figure 4 shows the energy company transition '
             'towards a green business model (if at all) given its optimally adapted business strategy:'
-            "<br> * The 'optimized' (black line) represents the investment percentage in green energy under the <b>optimally adapted business model.</b>"
-            "<br> ** The 'initial guess' (grey line) represents the initial guess that is provided to the optimization algorithm regarding the optimal investment % in green energy."
         ))
         plt.show()
+        display(widgets.HTML(
+            "* The 'optimized' (black line) represents the investment percentage in green energy under the <b>optimally adapted business model.</b>"
+            "<br> ** The 'initial guess' (grey line) represents the initial guess that is provided to the optimization algorithm regarding the optimal investment % in green energy."
+        ))
 btn.on_click(btn_eventhandler)
 
 display(simulation_plot)
