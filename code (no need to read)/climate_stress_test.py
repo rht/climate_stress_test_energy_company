@@ -310,7 +310,7 @@ def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0):
         max((p0 * Eg - cost_g + p0 * Eb - cost_b), 0)
     )
 
-def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
+def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False, initial=False):
     def _calc_U(xs):
         Us = []
         Vs = []
@@ -429,10 +429,14 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
         ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
 
         ax2 = ax.twinx()
-        ax2.plot(full_Ts, 100 * np.array([initial_x] + xs0),
-                 label='Initial guess', color='gray', linewidth=2.0)
-        ax2.plot(full_Ts, 100 * np.array([initial_x] + list(xs)),
-                 label='Optimized', color='black', linewidth=2.0)
+        if not initial:
+            ax2.plot(full_Ts, 100 * np.array([initial_x] + xs0),
+                     label='Initial guess', color='gray', linewidth=2.0)
+            ax2.plot(full_Ts, 100 * np.array([initial_x] + list(xs)),
+                     label='Optimized', color='black', linewidth=2.0)
+        else:
+            ax2.plot(full_Ts, 100 * np.array([initial_x] + xs0),
+                     label='Current', color='black', linewidth=2.0)
         ax2.set_ylabel("Investment in green energy x%")
         ax2.set_ylim(0, 101)
         fig.legend(loc=7)
@@ -471,18 +475,18 @@ def btn_eventhandler(obj):
         fn = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax)
         result = do_optimize(fn, xs0)
 
-        fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
-
         display(widgets.HTML(
             '<b>Output 1:</b> Value of the energy company given its current '
             'business strategy of directing 10% of its investments towards green energy projects:'
         ))
-        fn_with_plot(xs0)
+        fn_with_plot_initial = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True, initial=True)
+        fn_with_plot_initial(xs0)
         plt.title('Figure 3: ' + scenario.value)
         display(widgets.HTML(
             '<b>Output 2:</b> Figure 3 shows the portfolio of the energy '
             'company over time given its current business strategy of directing 10% of its '
             'investments towards green energy projects:'
+            "<br> * The 'current' (black line) represents the investment percentage in green energy under the <b>current business model</b>. This percentage is assumed to be 10%."
         ))
         plt.show()
 
@@ -490,11 +494,14 @@ def btn_eventhandler(obj):
             '<b>Output 3:</b> Value of the energy company given its optimally '
             'adapted business strategy:'
         ))
+        fn_with_plot = calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=True)
         fn_with_plot(result.x)
         plt.title('Figure 4: ' + scenario.value)
         display(widgets.HTML(
             '<b>Output 4:</b> Figure 4 shows the energy company transition '
             'towards a green business model (if at all) given its optimally adapted business strategy:'
+            "<br> * The 'optimized' (black line) represents the investment percentage in green energy under the <b>optimally adapted business model.</b>"
+            "<br> ** The 'initial guess' (grey line) represents the initial guess that is provided to the optimization algorithm regarding the optimal investment % in green energy."
         ))
         plt.show()
 btn.on_click(btn_eventhandler)
