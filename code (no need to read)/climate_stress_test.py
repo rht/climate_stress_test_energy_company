@@ -194,13 +194,7 @@ params_wind = dict(
     cg_initial=55 / 3.6,
     alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
 )
-# Empty line for a breather
-display(widgets.Label('\n\n'))
-display(widgets.Label(
-    value='3. What type of green energy does the brown energy company invest (if it decides to invest in green) in the climate stress test?'
-))
-dropdown_green = widgets.Dropdown(options=['solar', 'wind'])
-display(dropdown_green)
+green_tech = 'solar'
 green_params = widgets.Output()
 green_params.value = params_solar  # default
 # display(green_params)
@@ -217,7 +211,6 @@ def plot_cost_evolution():
     kappa = brown_params.value['kappa']
     phi_cb = brown_params.value['phi_cb']
     # green
-    green_tech = dropdown_green.value
     omega_hat = green_params.value['omega_hat'] * omega_hat_multiplier.value / 100
     sigma_omega = green_params.value['sigma_omega']
     sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
@@ -263,17 +256,6 @@ def dropdown_brown_eventhandler(change):
         display(brown_params.value)
     plot_cost_evolution()
 dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
-
-def dropdown_green_eventhandler(change):
-    green_params.clear_output()
-    if change.new == 'solar':
-        green_params.value = params_solar
-    else:  # wind
-        green_params.value = params_wind
-    with green_params:
-        display(green_params.value)
-    plot_cost_evolution()
-dropdown_green.observe(dropdown_green_eventhandler, names='value')
 
 # Brown energy percentage
 # Empty line for a breather
@@ -474,7 +456,7 @@ def calculate_utility(omega_cg, ut_greens, epsilon_cb, t_tax, plot_Evst=False):
 
         fig, ax = plt.subplots(figsize=(9, 5))
         fig.subplots_adjust(right=0.77)
-        ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({dropdown_green.value})'], colors=['brown', 'green'])
+        ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({green_tech})'], colors=['brown', 'green'])
         ax.set_ylabel('Energy (GJ)')
         ax.set_xlabel('Time (years)')
         ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
