@@ -75,6 +75,9 @@ display(widgets.Label(
 ))
 dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'], value='coal')
 display(dropdown_brown)
+display(widgets.HTML(
+    'If the brown company decides to invest in green energy, we assume it invests in solar power.'
+))
 brown_params = widgets.Output()
 brown_params.value = params_coal  # default
 # display(brown_params)
