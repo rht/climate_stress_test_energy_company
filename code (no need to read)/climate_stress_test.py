@@ -42,10 +42,72 @@ total_energy = 200_000_000  # GJ
 green_tech = 'solar'
 brown_energy_percentage = 75
 
+# Brown params
+display(widgets.HTML("<h1>Select type of brown energy company:</h1>"))
+params_oil = dict(
+    kappa = 0.342,
+    phi_cb = 0.846,
+    sigma_cb = 0.252,
+    cb_initial = 11.7,  # $/GJ
+    # See section "CO2 emission" on notes.md
+    # chi is tons emission of CO2 per GJ
+    chi = 0.07547,  # tons/GJ
+    alpha_b = 6.83  # $/GJ
+)
+params_coal = dict(
+    kappa = 0.035,
+    phi_cb = 0.95,
+    sigma_cb = 0.090,
+    cb_initial = 2.18,  # $/GJ
+    chi = 0.1024,  # tons/GJ
+    alpha_b = 1.61  # $/GJ
+)
+params_gas = dict(
+    kappa = 0.21,
+    phi_cb = 0.82,
+    sigma_cb = 0.24,
+    cb_initial = 3.0,  # $/GJ
+    chi = 0.05545,
+    alpha_b = 4.21  # $/GJ (DOE only)
+)
+display(widgets.Label(
+    value='1. What type of brown energy company would you like to subject to a climate stress test?'
+))
+dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'], value='coal')
+display(dropdown_brown)
+brown_params = widgets.Output()
+brown_params.value = params_coal  # default
+# display(brown_params)
+with brown_params:
+    display(brown_params.value)
+
+# Green params
+params_solar = dict(
+    omega_hat=0.303,
+    sigma_omega=0.047,
+    sigma_eta=0.093,
+    cg_initial=70 / 3.6,
+    alpha_g=14 / 8760 / 0.0036
+)
+params_wind = dict(
+    omega_hat=0.158,
+    sigma_omega=0.045,
+    sigma_eta=0.103,
+    cg_initial=55 / 3.6,
+    alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
+)
+green_params = widgets.Output()
+green_params.value = params_solar  # default
+# display(green_params)
+with green_params:
+    display(green_params.value)
+
+# Empty line for a breather
+display(widgets.Label('\n\n'))
 # Scenario
 display(widgets.HTML("<h1>Select transition scenario:</h1>"))
 scenario_description = widgets.Label(
-    value='1. Which carbon tax scenario from Figure 1 '
+    value='2. Which carbon tax scenario from Figure 1 '
           'below would you like to consider for the climate stress test?')
 display(scenario_description)
 scenario_list = [
@@ -138,69 +200,6 @@ def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
         cb_next = cb * math.exp((1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j])
         c_browns.append(cb_next)
     return c_browns
-
-# Empty line for a breather
-display(widgets.Label('\n\n'))
-display(widgets.HTML("<h1>Select type of brown & green energy company:</h1>"))
-
-# Brown params
-params_oil = dict(
-    kappa = 0.342,
-    phi_cb = 0.846,
-    sigma_cb = 0.252,
-    cb_initial = 11.7,  # $/GJ
-    # See section "CO2 emission" on notes.md
-    # chi is tons emission of CO2 per GJ
-    chi = 0.07547,  # tons/GJ
-    alpha_b = 6.83  # $/GJ
-)
-params_coal = dict(
-    kappa = 0.035,
-    phi_cb = 0.95,
-    sigma_cb = 0.090,
-    cb_initial = 2.18,  # $/GJ
-    chi = 0.1024,  # tons/GJ
-    alpha_b = 1.61  # $/GJ
-)
-params_gas = dict(
-    kappa = 0.21,
-    phi_cb = 0.82,
-    sigma_cb = 0.24,
-    cb_initial = 3.0,  # $/GJ
-    chi = 0.05545,
-    alpha_b = 4.21  # $/GJ (DOE only)
-)
-display(widgets.Label(
-    value='2. What type of brown energy company would you like to subject to a climate stress test?'
-))
-dropdown_brown = widgets.Dropdown(options=['oil', 'coal', 'gas'], value='coal')
-display(dropdown_brown)
-brown_params = widgets.Output()
-brown_params.value = params_coal  # default
-# display(brown_params)
-with brown_params:
-    display(brown_params.value)
-
-# Green params
-params_solar = dict(
-    omega_hat=0.303,
-    sigma_omega=0.047,
-    sigma_eta=0.093,
-    cg_initial=70 / 3.6,
-    alpha_g=14 / 8760 / 0.0036
-)
-params_wind = dict(
-    omega_hat=0.158,
-    sigma_omega=0.045,
-    sigma_eta=0.103,
-    cg_initial=55 / 3.6,
-    alpha_g = (30 + 99.5) / 2 / 8760 / 0.0036
-)
-green_params = widgets.Output()
-green_params.value = params_solar  # default
-# display(green_params)
-with green_params:
-    display(green_params.value)
 
 # Cost evolution, brown params, and green params event handler
 def plot_cost_evolution():
