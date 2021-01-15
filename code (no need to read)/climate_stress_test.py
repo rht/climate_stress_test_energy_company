@@ -431,8 +431,7 @@ display(widgets.HTML("<h1>Press run:</h1>"))
 display(widgets.HTML(
     'To generate the outputs of the climate stress test of your '
     'energy company given your selected transition and technology scenario, '
-    'press "Run". (Please note that the output plots update only if you press '
-    'run again, following any changes you make to your selections in questions 1-3.)'
+    'press "Run".'
 ))
 btn = widgets.Button(description='Run')
 display(btn)
