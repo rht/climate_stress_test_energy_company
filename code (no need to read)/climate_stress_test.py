@@ -171,15 +171,14 @@ with scenario_plot:
 
 # For cost evolution visualization
 averaged_montecarlo_plot = widgets.Output()
-MCPATHS = widgets.Output()
-MCPATHS.value = 5
+MCPATHS = 1000
 def evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial):
     # Rupert appendix p38
     # We generate the cost evolution for every monte carlo
     # path, and then we average the path for every point in
     # time.
     c_greens_all = []
-    for n in range(MCPATHS.value):
+    for n in range(MCPATHS):
         omega_cg = np.random.normal(omega_hat, sigma_omega)
         ut_greens = np.random.normal(0, sigma_u, len(Ts))
         c_greens = [cg_initial]
@@ -199,7 +198,7 @@ def evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial):
 
 def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
     c_browns_all = []
-    for n in range(MCPATHS.value):
+    for n in range(MCPATHS):
         epsilon_cb = np.random.normal(0, sigma_cb, len(Ts))
         c_browns = [cb_initial]
         for j in range(len(Ts)):
@@ -227,7 +226,6 @@ def plot_cost_evolution():
     sigma_omega = green_params.value['sigma_omega']
     sigma_u = green_params.value['sigma_eta'] / np.sqrt(1 + rho_cg ** 2)
     cg_initial = green_params.value['cg_initial']
-    MCPATHS.value = 5
     averaged_montecarlo_plot.clear_output()
     with averaged_montecarlo_plot:
         ave_c_browns = evolve_cb(sigma_cb, cb_initial, kappa, phi_cb)
@@ -468,8 +466,6 @@ def btn_eventhandler(obj):
         cb_initial = brown_params.value['cb_initial']
         kappa = brown_params.value['kappa']
         phi_cb = brown_params.value['phi_cb']
-
-        MCPATHS.value = 1000
 
         c_greens = evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial)
         c_browns = evolve_cb(sigma_cb, cb_initial, kappa, phi_cb)
