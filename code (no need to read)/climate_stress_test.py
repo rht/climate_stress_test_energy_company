@@ -238,19 +238,6 @@ def plot_cost_evolution():
         plt.legend()
         plt.show()
 
-def dropdown_brown_eventhandler(change):
-    brown_params.clear_output()
-    if change.new == 'oil':
-        brown_params.value = params_oil
-    elif change.new == 'coal':
-        brown_params.value = params_coal
-    else:  # gas
-        brown_params.value = params_gas
-    with brown_params:
-        display(brown_params.value)
-    plot_cost_evolution()
-dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
-
 display(widgets.HTML("<h1>Select technology scenario:</h1>"))
 
 # omega_hat
@@ -287,9 +274,6 @@ omega_hat_multiplier = widgets.IntSlider(
     layout=widgets.Layout(width='60%')
 )
 display(omega_hat_multiplier)
-def omega_hat_multiplier_eventhandler(change):
-    plot_cost_evolution()
-omega_hat_multiplier.observe(omega_hat_multiplier_eventhandler, names='value')
 
 # Display cost evolution here
 display(averaged_montecarlo_plot)
@@ -452,6 +436,29 @@ display(widgets.HTML(
 ))
 btn = widgets.Button(description='Run')
 display(btn)
+
+# Event handlers
+def dropdown_brown_eventhandler(change):
+    simulation_plot.clear_output()
+    brown_params.clear_output()
+    if change.new == 'oil':
+        brown_params.value = params_oil
+    elif change.new == 'coal':
+        brown_params.value = params_coal
+    else:  # gas
+        brown_params.value = params_gas
+    with brown_params:
+        display(brown_params.value)
+    plot_cost_evolution()
+dropdown_brown.observe(dropdown_brown_eventhandler, names='value')
+
+scenario.observe(lambda x: simulation_plot.clear_output(), names='value')
+
+def omega_hat_multiplier_eventhandler(change):
+    simulation_plot.clear_output()
+    plot_cost_evolution()
+omega_hat_multiplier.observe(omega_hat_multiplier_eventhandler, names='value')
+
 def btn_eventhandler(obj):
     simulation_plot.clear_output()
     with simulation_plot:
