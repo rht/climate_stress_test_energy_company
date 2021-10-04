@@ -10,7 +10,7 @@ Read the valuation model of the energy company ([pdf link](https://github.com/rh
 
 ## Step 3:
 
-Read the assignment ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Illustrative-Excercise-Climate-Stress-Testing-an-Energy-Company-Climate-Finance-Course-Fall-2021-Stanford.pdf)).
+Read the illustrative exercise ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Illustrative-Excercise-Climate-Stress-Testing-an-Energy-Company-Climate-Finance-Course-Fall-2021-Stanford.pdf)).
 
 ## Step 4:
 
@@ -20,12 +20,13 @@ Answer the questions in the assignment by conducting a climate stress test of th
 
 ## Step 5:
 
-Prepare a 5-to-7 minute PowerPoint presentation of your findings, with the following structure (see also instructions in pdf link in step 3):
-* Show and critically discuss findings on the core questions (2 min).
-* Show and discuss findings on the transition & technology scenario questions (2 min).
-* Discuss validity and ways to improve your energy company stress test (3 min).
+Organize your findings using the following structure (see also instructions in pdf link in step 3):
+* Show and critically discuss findings on the core questions.
+* Show and discuss findings on the transition & technology scenario questions.
+* Discuss validity and ways to improve your energy company stress test.
 
 ## Notes:
 
-* You do not need to look at the code to complete the assignment.
+* You do not need to look at the code to complete the exercise.
+* You can fork the repo (i.e. copy the code) to adjust and/or extend it for your own research project, if you want to use this code as a basis.
 * You can look at the [default parameters](https://github.com/rht/climate_stress_test_energy_company/blob/main/default_parameters%20(read%20optionally).md) used for the model, but this is not necessary.
