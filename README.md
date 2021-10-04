@@ -2,7 +2,7 @@
 
 ## Step 1:
 
-Read the motivations for conducting a climate stress test of a firm ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Motivation-for-Climate-Stress-Tests.pdf))
+Read the motivations for conducting a climate stress test of a firm ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Motivation-for-Climate-Stress-Testing-Econ-101-Climate-Finance-Stanford-Fall-2021.pdf))
 
 ## Step 2:
 
