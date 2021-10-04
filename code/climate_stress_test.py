@@ -16,11 +16,19 @@
 # + cellView="form"
 # @title Illustrative Exercise: Stress Testing an Energy Company
 
-import math
-
 import ipywidgets as widgets
 import numpy as np
 import matplotlib.pyplot as plt
+
+# This file is divided into 2 sections:
+# - model code
+# - GUI code
+# We can't split the file into 2 files because of annoying Google Colab
+# restriction that reads only 1 .ipynb file.
+
+# Model
+import math
+
 from scipy.optimize import minimize
 from scipy.optimize import Bounds
 
@@ -42,6 +50,274 @@ xs0 = [min(1, initial_x) for i in range(DeltaT)]
 total_energy = 200_000_000  # GJ
 green_tech = "solar"
 brown_energy_percentage = 75
+MCPATHS = 1000
+
+
+def calculate_cost_g(cg, x, delta_E, Eg, alpha_g):
+    return cg * x * delta_E + alpha_g * (Eg ** beta)
+
+
+def calculate_cost_b(cb, tax, x, delta_E, Eb, alpha_b):
+    return (cb + tax) * (1 - x) * delta_E + alpha_b * (Eb ** beta) + tax * Eb
+
+
+def evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial):
+    # Rupert appendix p38
+    # We generate the cost evolution for every monte carlo
+    # path, and then we average the path for every point in
+    # time.
+    c_greens_all = []
+    for n in range(MCPATHS):
+        omega_cg = np.random.normal(omega_hat, sigma_omega)
+        ut_greens = np.random.normal(0, sigma_u, len(Ts))
+        c_greens = [cg_initial]
+        for j in range(len(Ts)):
+            ut = ut_greens[j]
+            cg = c_greens[-1]
+            # Wright's law
+            if (j - 1) == -1:
+                ut_minus1 = 0
+            else:
+                ut_minus1 = ut_greens[j - 1]
+            cg_next = cg * math.exp(-omega_cg + ut + rho_cg * ut_minus1)
+            c_greens.append(cg_next)
+        c_greens_all.append(c_greens)
+    c_greens_ave = np.mean(c_greens_all, axis=0)
+    return c_greens_ave
+
+
+def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
+    c_browns_all = []
+    for n in range(MCPATHS):
+        epsilon_cb = np.random.normal(0, sigma_cb, len(Ts))
+        c_browns = [cb_initial]
+        for j in range(len(Ts)):
+            cb = c_browns[-1]
+            # AR(1)
+            # Equation 25 of Rupert appendix
+            m_cb = kappa / (1 - phi_cb)
+            cb_next = cb * math.exp(
+                (1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j]
+            )
+            c_browns.append(cb_next)
+        c_browns_all.append(c_browns)
+    c_browns_ave = np.mean(c_browns_all, axis=0)
+    return c_browns_ave
+
+
+def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0, alpha_g, alpha_b):
+    # Discounted profit associated with year t + tau
+    cost_g = calculate_cost_g(cg, x, delta_E, Eg, alpha_g)
+    cost_b = calculate_cost_b(cb, tax, x, delta_E, Eb, alpha_b)
+    return math.exp(-rho * tau) * (max((p0 * Eg - cost_g + p0 * Eb - cost_b), 0))
+
+
+def plot_Evst_and_xs(E_browns, E_greens, initial, xs, brown_tech):
+    fig, ax = plt.subplots(figsize=(9, 5))
+    fig.subplots_adjust(right=0.77)
+    ax.stackplot(
+        full_Ts,
+        [E_browns, E_greens],
+        labels=[f"Brown ({brown_tech})", f"Green ({green_tech})"],
+        colors=["tab:brown", "tab:green"],
+    )
+    ax.set_ylabel("Energy (GJ)")
+    ax.set_xlabel("Time (years)")
+    ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
+
+    ax2 = ax.twinx()
+    if not initial:
+        ax2.plot(
+            full_Ts,
+            100 * np.array([initial_x] + xs0),
+            label="Initial guess",
+            color="gray",
+            linewidth=2.0,
+        )
+        ax2.plot(
+            full_Ts,
+            100 * np.array([initial_x] + list(xs)),
+            label="Optimized",
+            color="black",
+            linewidth=2.0,
+        )
+    else:
+        ax2.plot(
+            full_Ts,
+            100 * np.array([initial_x] + xs0),
+            label="Current",
+            color="black",
+            linewidth=2.0,
+        )
+    ax2.set_ylabel("Investment in green energy x%")
+    ax2.set_ylim(0, 101)
+    fig.legend(loc=7)
+
+
+def calculate_utility(
+    scenario,
+    c_greens,
+    c_browns,
+    t_tax,
+    alpha_g,
+    alpha_b,
+    chi,
+    brown_tech,
+    plot_Evst=False,
+    initial=False,
+):
+    def _calc_U(xs):
+        Us = []
+        Vs = []
+        for i in range(1):
+            full_xs = [initial_x] + list(xs)
+            # Initialize first element of all the time series at t = 2020
+            brown_fraction = brown_energy_percentage / 100
+            # Time series of green energy
+            E_greens = [
+                (1 - brown_fraction) * total_energy
+            ]  # GJ/yr, useful energy at t0
+            E_browns = [brown_fraction * total_energy]  # GJ/yr, useful energy at t0
+            E_total = E_greens[0] + E_browns[0]
+            # Time series of total depreciation of energy
+            delta_Es = [dg * E_greens[0] + db * E_browns[0]]
+            tax = 0.0
+            taxes = [tax]
+
+            # There is no need to discount the initial
+            # denominator term because tau is 0 anyway.
+            denominators = [
+                (c_greens[0] * full_xs[0] + c_browns[0] * (1 - full_xs[0]))
+                * delta_Es[0]
+            ]
+
+            price0 = (
+                (1 + mu)
+                * (
+                    calculate_cost_g(
+                        c_greens[0], full_xs[0], delta_Es[0], E_greens[0], alpha_g
+                    )
+                    + calculate_cost_b(
+                        c_browns[0], tax, full_xs[0], delta_Es[0], E_browns[0], alpha_b
+                    )
+                )
+                / E_total
+            )
+            numerators = [
+                calculate_numerator(
+                    0,
+                    full_xs[0],
+                    delta_Es[0],
+                    E_greens[0],
+                    E_browns[0],
+                    c_greens[0],
+                    c_browns[0],
+                    tax,
+                    price0,
+                    alpha_g,
+                    alpha_b,
+                )
+            ]
+
+            assert len(full_xs) == (len(Ts) + 1), (len(full_xs), len(Ts) + 1)
+
+            for j, t in enumerate(Ts):
+                Eg = E_greens[-1]
+                cg = c_greens[j]
+                Eb = E_browns[-1]
+                cb = c_browns[j]
+                delta_E = delta_Es[-1]
+                x = full_xs[j + 1]
+
+                assert abs(E_total - (Eg + Eb)) / E_total < 1e-9
+                # Doyne equation 18
+                E_green_next = Eg * (1 - dg) + x * delta_E
+                # Doyne equation 19
+                E_brown_next = Eb * (1 - db) + (1 - x) * delta_E
+                delta_E_next = dg * E_green_next + db * E_brown_next
+
+                if scenario == "Orderly transition":
+                    # Allen 2020 page 11
+                    # First scenario of NGFS (orderly).
+                    # "That price increases by about $10/ton of CO2 per year until 2050"
+                    if t <= 2050:
+                        tax += 10.0 * chi
+                elif scenario == "Disorderly transition (late)":
+                    # Allen 2020 page 11
+                    # Second scenario of NGFS (disorderly).
+                    # "In 2030, the carbon price is abruptly revised and
+                    # increases by about $40/ton of CO2 per year afterwards to
+                    # keep on track with climate commitments."
+                    # We use NGFS paper's number which is $35/ton
+                    if t > 2030:
+                        tax += 35.0 * chi
+                elif scenario == "Disorderly transition (sudden)":
+                    if t > 2025:
+                        tax += 36.0 * chi
+                elif scenario == "No transition (hot house world)":
+                    # Third scenario of NGFS (hot house).
+                    pass
+                elif scenario == "Too little, too late transition":
+                    if t > 2030:
+                        tax += 10.0 * chi
+
+                cg_next = c_greens[j + 1]
+                cb_next = c_browns[j + 1]
+
+                E_greens.append(E_green_next)
+                E_browns.append(E_brown_next)
+                delta_Es.append(delta_E_next)
+                taxes.append(tax)
+                numerator = calculate_numerator(
+                    t - Tstart,
+                    x,
+                    delta_E_next,
+                    E_green_next,
+                    E_brown_next,
+                    cg_next,
+                    cb_next,
+                    tax,
+                    price0,
+                    alpha_g,
+                    alpha_b,
+                )
+                numerators.append(numerator)
+                denominator = (
+                    math.exp(-rho * (t - Tstart))
+                    * (cg_next * x + (cb_next + tax) * (1 - x))
+                    * delta_E_next
+                )
+                denominators.append(denominator)
+            sum_numerators = sum(numerators)
+            U = math.log(sum_numerators / sum(denominators))
+            Us.append(U)
+            Vs.append(sum_numerators)
+
+        mean_U = np.mean(Us)
+        # Reverse the sign because we only have `minimize` function
+        out = -mean_U
+        if not plot_Evst:
+            return out
+
+        # Else plot E vs t
+        # First, print out the value of numerators
+        print("$", round(np.mean(Vs) / 1000_000_000, 2), "billion")
+        plot_Evst_and_xs(E_browns, E_greens, initial, xs, brown_tech)
+        return out
+
+    return _calc_U
+
+
+def do_optimize(fn, xs0):
+    method = "SLSQP"
+    bounds = Bounds([0.0 for i in range(DeltaT)], [1.0 for i in range(DeltaT)])
+    result = minimize(fn, xs0, bounds=bounds, method=method)
+    return result
+
+
+# End of Model
+
+# Start of GUI section
 
 # Brown params
 display(widgets.HTML("<h1>Select type of brown energy company:</h1>"))
@@ -162,7 +438,10 @@ with scenario_plot:
     plt.plot(full_Ts, taxes, label=scenario_list[2], color="#ff7f0e")  # orange
     # Hot house
     plt.plot(
-        full_Ts, [0] * len(full_Ts), label=scenario_list[3], color="#d62728"  # red
+        full_Ts,
+        [0] * len(full_Ts),
+        label=scenario_list[3],
+        color="#d62728",  # red
     )
     plt.ylabel("USD/t $CO_2$")
     plt.xlabel("Time (years)")
@@ -172,51 +451,6 @@ with scenario_plot:
 
 # For cost evolution visualization
 averaged_montecarlo_plot = widgets.Output()
-MCPATHS = 1000
-
-
-def evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial):
-    # Rupert appendix p38
-    # We generate the cost evolution for every monte carlo
-    # path, and then we average the path for every point in
-    # time.
-    c_greens_all = []
-    for n in range(MCPATHS):
-        omega_cg = np.random.normal(omega_hat, sigma_omega)
-        ut_greens = np.random.normal(0, sigma_u, len(Ts))
-        c_greens = [cg_initial]
-        for j in range(len(Ts)):
-            ut = ut_greens[j]
-            cg = c_greens[-1]
-            # Wright's law
-            if (j - 1) == -1:
-                ut_minus1 = 0
-            else:
-                ut_minus1 = ut_greens[j - 1]
-            cg_next = cg * math.exp(-omega_cg + ut + rho_cg * ut_minus1)
-            c_greens.append(cg_next)
-        c_greens_all.append(c_greens)
-    c_greens_ave = np.mean(c_greens_all, axis=0)
-    return c_greens_ave
-
-
-def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
-    c_browns_all = []
-    for n in range(MCPATHS):
-        epsilon_cb = np.random.normal(0, sigma_cb, len(Ts))
-        c_browns = [cb_initial]
-        for j in range(len(Ts)):
-            cb = c_browns[-1]
-            # AR(1)
-            # Equation 25 of Rupert appendix
-            m_cb = kappa / (1 - phi_cb)
-            cb_next = cb * math.exp(
-                (1 - phi_cb) * (m_cb - math.log(cb)) + epsilon_cb[j]
-            )
-            c_browns.append(cb_next)
-        c_browns_all.append(c_browns)
-    c_browns_ave = np.mean(c_browns_all, axis=0)
-    return c_browns_ave
 
 
 # Cost evolution, brown params, and green params event handler
@@ -289,209 +523,6 @@ display(omega_hat_multiplier)
 display(averaged_montecarlo_plot)
 plot_cost_evolution()
 
-# Model
-def calculate_cost_g(cg, x, delta_E, Eg):
-    alpha_g = green_params.value["alpha_g"]
-    return cg * x * delta_E + alpha_g * (Eg ** beta)
-
-
-def calculate_cost_b(cb, tax, x, delta_E, Eb):
-    alpha_b = brown_params.value["alpha_b"]
-    return (cb + tax) * (1 - x) * delta_E + alpha_b * (Eb ** beta) + tax * Eb
-
-
-def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0):
-    # Discounted profit associated with year t + tau
-    cost_g = calculate_cost_g(cg, x, delta_E, Eg)
-    cost_b = calculate_cost_b(cb, tax, x, delta_E, Eb)
-    return math.exp(-rho * tau) * (max((p0 * Eg - cost_g + p0 * Eb - cost_b), 0))
-
-
-def plot_Evst_and_xs(E_browns, E_greens, initial, xs):
-    fig, ax = plt.subplots(figsize=(9, 5))
-    fig.subplots_adjust(right=0.77)
-    ax.stackplot(
-        full_Ts,
-        [E_browns, E_greens],
-        labels=[f"Brown ({dropdown_brown.value})", f"Green ({green_tech})"],
-        colors=["tab:brown", "tab:green"],
-    )
-    ax.set_ylabel("Energy (GJ)")
-    ax.set_xlabel("Time (years)")
-    ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
-
-    ax2 = ax.twinx()
-    if not initial:
-        ax2.plot(
-            full_Ts,
-            100 * np.array([initial_x] + xs0),
-            label="Initial guess",
-            color="gray",
-            linewidth=2.0,
-        )
-        ax2.plot(
-            full_Ts,
-            100 * np.array([initial_x] + list(xs)),
-            label="Optimized",
-            color="black",
-            linewidth=2.0,
-        )
-    else:
-        ax2.plot(
-            full_Ts,
-            100 * np.array([initial_x] + xs0),
-            label="Current",
-            color="black",
-            linewidth=2.0,
-        )
-    ax2.set_ylabel("Investment in green energy x%")
-    ax2.set_ylim(0, 101)
-    fig.legend(loc=7)
-
-
-def calculate_utility(c_greens, c_browns, t_tax, plot_Evst=False, initial=False):
-    def _calc_U(xs):
-        Us = []
-        Vs = []
-        for i in range(1):
-            full_xs = [initial_x] + list(xs)
-            # Initialize first element of all the time series at t = 2020
-            brown_fraction = brown_energy_percentage / 100
-            # Time series of green energy
-            E_greens = [
-                (1 - brown_fraction) * total_energy
-            ]  # GJ/yr, useful energy at t0
-            E_browns = [brown_fraction * total_energy]  # GJ/yr, useful energy at t0
-            E_total = E_greens[0] + E_browns[0]
-            # Time series of total depreciation of energy
-            delta_Es = [dg * E_greens[0] + db * E_browns[0]]
-            tax = 0.0
-            taxes = [tax]
-
-            # There is no need to discount the initial
-            # denominator term because tau is 0 anyway.
-            denominators = [
-                (c_greens[0] * full_xs[0] + c_browns[0] * (1 - full_xs[0]))
-                * delta_Es[0]
-            ]
-
-            price0 = (
-                (1 + mu)
-                * (
-                    calculate_cost_g(c_greens[0], full_xs[0], delta_Es[0], E_greens[0])
-                    + calculate_cost_b(
-                        c_browns[0], tax, full_xs[0], delta_Es[0], E_browns[0]
-                    )
-                )
-                / E_total
-            )
-            numerators = [
-                calculate_numerator(
-                    0,
-                    full_xs[0],
-                    delta_Es[0],
-                    E_greens[0],
-                    E_browns[0],
-                    c_greens[0],
-                    c_browns[0],
-                    tax,
-                    price0,
-                )
-            ]
-
-            assert len(full_xs) == (len(Ts) + 1), (len(full_xs), len(Ts) + 1)
-
-            for j, t in enumerate(Ts):
-                Eg = E_greens[-1]
-                cg = c_greens[j]
-                Eb = E_browns[-1]
-                cb = c_browns[j]
-                delta_E = delta_Es[-1]
-                x = full_xs[j + 1]
-
-                assert abs(E_total - (Eg + Eb)) / E_total < 1e-9
-                # Doyne equation 18
-                E_green_next = Eg * (1 - dg) + x * delta_E
-                # Doyne equation 19
-                E_brown_next = Eb * (1 - db) + (1 - x) * delta_E
-                delta_E_next = dg * E_green_next + db * E_brown_next
-
-                if scenario.value == "Orderly transition":
-                    # Allen 2020 page 11
-                    # First scenario of NGFS (orderly).
-                    # "That price increases by about $10/ton of CO2 per year until 2050"
-                    if t <= 2050:
-                        tax += 10.0 * brown_params.value["chi"]
-                elif scenario.value == "Disorderly transition (late)":
-                    # Allen 2020 page 11
-                    # Second scenario of NGFS (disorderly).
-                    # "In 2030, the carbon price is abruptly revised and
-                    # increases by about $40/ton of CO2 per year afterwards to
-                    # keep on track with climate commitments."
-                    # We use NGFS paper's number which is $35/ton
-                    if t > 2030:
-                        tax += 35.0 * brown_params.value["chi"]
-                elif scenario.value == "Disorderly transition (sudden)":
-                    if t > 2025:
-                        tax += 36.0 * brown_params.value["chi"]
-                elif scenario.value == "No transition (hot house world)":
-                    # Third scenario of NGFS (hot house).
-                    pass
-                elif scenario.value == "Too little, too late transition":
-                    if t > 2030:
-                        tax += 10.0 * brown_params.value["chi"]
-
-                cg_next = c_greens[j + 1]
-                cb_next = c_browns[j + 1]
-
-                E_greens.append(E_green_next)
-                E_browns.append(E_brown_next)
-                delta_Es.append(delta_E_next)
-                taxes.append(tax)
-                numerator = calculate_numerator(
-                    t - Tstart,
-                    x,
-                    delta_E_next,
-                    E_green_next,
-                    E_brown_next,
-                    cg_next,
-                    cb_next,
-                    tax,
-                    price0,
-                )
-                numerators.append(numerator)
-                denominator = (
-                    math.exp(-rho * (t - Tstart))
-                    * (cg_next * x + (cb_next + tax) * (1 - x))
-                    * delta_E_next
-                )
-                denominators.append(denominator)
-            sum_numerators = sum(numerators)
-            U = math.log(sum_numerators / sum(denominators))
-            Us.append(U)
-            Vs.append(sum_numerators)
-
-        mean_U = np.mean(Us)
-        # Reverse the sign because we only have `minimize` function
-        out = -mean_U
-        if not plot_Evst:
-            return out
-
-        # Else plot E vs t
-        # First, print out the value of numerators
-        print("$", round(np.mean(Vs) / 1000_000_000, 2), "billion")
-        plot_Evst_and_xs(E_browns, E_greens, initial, xs)
-        return out
-
-    return _calc_U
-
-
-def do_optimize(fn, xs0):
-    method = "SLSQP"
-    bounds = Bounds([0.0 for i in range(DeltaT)], [1.0 for i in range(DeltaT)])
-    result = minimize(fn, xs0, bounds=bounds, method=method)
-    return result
-
 
 # Plot
 simulation_plot = widgets.Output()
@@ -554,7 +585,20 @@ def btn_eventhandler(obj):
         c_greens = evolve_cg(omega_hat, sigma_omega, sigma_u, cg_initial)
         c_browns = evolve_cb(sigma_cb, cb_initial, kappa, phi_cb)
 
-        fn = calculate_utility(c_greens, c_browns, t_tax)
+        alpha_g = green_params.value["alpha_g"]
+        alpha_b = brown_params.value["alpha_b"]
+        chi = brown_params.value["chi"]
+        brown_tech = dropdown_brown.value
+        fn = calculate_utility(
+            scenario.value,
+            c_greens,
+            c_browns,
+            t_tax,
+            alpha_g,
+            alpha_b,
+            chi,
+            brown_tech,
+        )
         result = do_optimize(fn, xs0)
 
         display(
@@ -564,7 +608,16 @@ def btn_eventhandler(obj):
             )
         )
         fn_with_plot_initial = calculate_utility(
-            c_greens, c_browns, t_tax, plot_Evst=True, initial=True
+            scenario.value,
+            c_greens,
+            c_browns,
+            t_tax,
+            alpha_g,
+            alpha_b,
+            chi,
+            brown_tech,
+            plot_Evst=True,
+            initial=True,
         )
         fn_with_plot_initial(xs0)
         plt.title("Figure 3: " + scenario.value)
@@ -588,7 +641,17 @@ def btn_eventhandler(obj):
                 "adapted business strategy:"
             )
         )
-        fn_with_plot = calculate_utility(c_greens, c_browns, t_tax, plot_Evst=True)
+        fn_with_plot = calculate_utility(
+            scenario.value,
+            c_greens,
+            c_browns,
+            t_tax,
+            alpha_g,
+            alpha_b,
+            chi,
+            brown_tech,
+            plot_Evst=True,
+        )
         fn_with_plot(result.x)
         plt.title("Figure 4: " + scenario.value)
         display(
