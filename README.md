@@ -6,7 +6,7 @@ Read the motivations for conducting a climate stress test of a firm ([pdf link](
 
 ## Step 2:
 
-Read the valuation model of the energy company ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Climate-Stress-Testing-an-Energy-Company-Valuation-Model-12-January-2021-protected.pdf); download the file since it is password protected). The model is also simply described in words without formulas ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Stress-Testing-an-Energy-Company-Valuation-Model-in-Words.pdf); download the file since it is password protected).
+Read the valuation model of the energy company ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Climate-Stress-Testing-an-Energy-Company-Valuation-Model-12-January-2021-protected.pdf); download the file since it is password protected). The model is also simply described in words without formulas ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Climate-Stress-Testing-an-Energy-Company-Valuation-Model-in-Words-Protected.pdf); download the file since it is password protected).
 
 ## Step 3:
 
