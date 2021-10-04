@@ -223,18 +223,14 @@ def calculate_utility(
 
             # There is no need to discount the initial
             # denominator term because tau is 0 anyway.
-            denominators = [
-                (c_greens[0] * full_xs[0] + c_browns[0] * (1 - full_xs[0])) * delta_E
-            ]
+            denominators = [(c_greens[0] * x + c_browns[0] * (1 - x)) * delta_E]
 
             price0 = (
                 (1 + mu)
                 * (
-                    calculate_cost_g(
-                        c_greens[0], full_xs[0], delta_E, E_greens[0], alpha_g
-                    )
+                    calculate_cost_g(c_greens[0], x, delta_E, E_greens[0], alpha_g)
                     + calculate_cost_b(
-                        c_browns[0], tax, full_xs[0], delta_E, E_browns[0], alpha_b
+                        c_browns[0], tax, x, delta_E, E_browns[0], alpha_b
                     )
                 )
                 / E_total
@@ -242,7 +238,7 @@ def calculate_utility(
             numerators = [
                 calculate_numerator(
                     0,
-                    full_xs[0],
+                    x,
                     delta_E,
                     E_greens[0],
                     E_browns[0],
