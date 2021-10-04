@@ -1,4 +1,4 @@
-# Illustrative Exercise: Stress Testing an Energy Company
+# Illustrative Exercise: Stress Testing an Energy Company (Stanford ECON 101: Climate Finance Fall 2021)
 
 ## Step 1:
 
