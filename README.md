@@ -10,7 +10,7 @@ Read the valuation model of the energy company ([pdf link](https://github.com/rh
 
 ## Step 3:
 
-Read the assignment ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Assignment-Climate-Stress-Testing-an-Energy-Company.pdf)).
+Read the assignment ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Illustrative-Excercise-Climate-Stress-Testing-an-Energy-Company-Climate-Finance-Course-Fall-2021-Stanford.pdf)).
 
 ## Step 4:
 
