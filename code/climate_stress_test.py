@@ -398,7 +398,7 @@ def calculate_utility(c_greens, c_browns, t_tax, plot_Evst=False, initial=False)
 
         fig, ax = plt.subplots(figsize=(9, 5))
         fig.subplots_adjust(right=0.77)
-        ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({green_tech})'], colors=['brown', 'green'])
+        ax.stackplot(full_Ts, [E_browns, E_greens], labels=[f'Brown ({dropdown_brown.value})', f'Green ({green_tech})'], colors=['tab:brown', 'tab:green'])
         ax.set_ylabel('Energy (GJ)')
         ax.set_xlabel('Time (years)')
         ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
