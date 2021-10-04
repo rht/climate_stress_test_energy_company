@@ -105,6 +105,38 @@ def evolve_cb(sigma_cb, cb_initial, kappa, phi_cb):
     return c_browns_ave
 
 
+def calculate_taxes(scenario, tax_initial, chi):
+    tax = tax_initial
+    taxes = [tax]
+    for t in Ts:
+        if scenario == "Orderly transition":
+            # Allen 2020 page 11
+            # First scenario of NGFS (orderly).
+            # "That price increases by about $10/ton of CO2 per year until 2050"
+            if t <= 2050:
+                tax += 10.0 * chi
+        elif scenario == "Disorderly transition (late)":
+            # Allen 2020 page 11
+            # Second scenario of NGFS (disorderly).
+            # "In 2030, the carbon price is abruptly revised and
+            # increases by about $40/ton of CO2 per year afterwards to
+            # keep on track with climate commitments."
+            # We use NGFS paper's number which is $35/ton
+            if t > 2030:
+                tax += 35.0 * chi
+        elif scenario == "Disorderly transition (sudden)":
+            if t > 2025:
+                tax += 36.0 * chi
+        elif scenario == "No transition (hot house world)":
+            # Third scenario of NGFS (hot house).
+            pass
+        elif scenario == "Too little, too late transition":
+            if t > 2030:
+                tax += 10.0 * chi
+        taxes.append(tax)
+    return taxes
+
+
 def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0, alpha_g, alpha_b):
     # Discounted profit associated with year t + tau
     cost_g = calculate_cost_g(cg, x, delta_E, Eg, alpha_g)
@@ -166,6 +198,8 @@ def calculate_utility(
     plot_Evst=False,
     initial=False,
 ):
+    taxes = calculate_taxes(scenario, 0.0, chi)
+
     def _calc_U(xs):
         Us = []
         Vs = []
@@ -181,8 +215,7 @@ def calculate_utility(
             E_total = E_greens[0] + E_browns[0]
             # Time series of total depreciation of energy
             delta_Es = [dg * E_greens[0] + db * E_browns[0]]
-            tax = 0.0
-            taxes = [tax]
+            tax = taxes[0]
 
             # There is no need to discount the initial
             # denominator term because tau is 0 anyway.
@@ -228,6 +261,7 @@ def calculate_utility(
                 cb = c_browns[j]
                 delta_E = delta_Es[-1]
                 x = full_xs[j + 1]
+                tax = taxes[j + 1]
 
                 assert abs(E_total - (Eg + Eb)) / E_total < 1e-9
                 # Doyne equation 18
@@ -236,38 +270,12 @@ def calculate_utility(
                 E_brown_next = Eb * (1 - db) + (1 - x) * delta_E
                 delta_E_next = dg * E_green_next + db * E_brown_next
 
-                if scenario == "Orderly transition":
-                    # Allen 2020 page 11
-                    # First scenario of NGFS (orderly).
-                    # "That price increases by about $10/ton of CO2 per year until 2050"
-                    if t <= 2050:
-                        tax += 10.0 * chi
-                elif scenario == "Disorderly transition (late)":
-                    # Allen 2020 page 11
-                    # Second scenario of NGFS (disorderly).
-                    # "In 2030, the carbon price is abruptly revised and
-                    # increases by about $40/ton of CO2 per year afterwards to
-                    # keep on track with climate commitments."
-                    # We use NGFS paper's number which is $35/ton
-                    if t > 2030:
-                        tax += 35.0 * chi
-                elif scenario == "Disorderly transition (sudden)":
-                    if t > 2025:
-                        tax += 36.0 * chi
-                elif scenario == "No transition (hot house world)":
-                    # Third scenario of NGFS (hot house).
-                    pass
-                elif scenario == "Too little, too late transition":
-                    if t > 2030:
-                        tax += 10.0 * chi
-
                 cg_next = c_greens[j + 1]
                 cb_next = c_browns[j + 1]
 
                 E_greens.append(E_green_next)
                 E_browns.append(E_brown_next)
                 delta_Es.append(delta_E_next)
-                taxes.append(tax)
                 numerator = calculate_numerator(
                     t - Tstart,
                     x,
