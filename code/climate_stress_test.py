@@ -216,26 +216,25 @@ def calculate_utility(
             ]  # GJ/yr, useful energy at t0
             E_browns = [brown_fraction * total_energy]  # GJ/yr, useful energy at t0
             E_total = E_greens[0] + E_browns[0]
-            # Time series of total depreciation of energy
-            delta_Es = [dg * E_greens[0] + db * E_browns[0]]
+            # Total depreciation of energy
+            delta_E = dg * E_greens[0] + db * E_browns[0]
             tax = taxes[0]
             x = full_xs[0]
 
             # There is no need to discount the initial
             # denominator term because tau is 0 anyway.
             denominators = [
-                (c_greens[0] * full_xs[0] + c_browns[0] * (1 - full_xs[0]))
-                * delta_Es[0]
+                (c_greens[0] * full_xs[0] + c_browns[0] * (1 - full_xs[0])) * delta_E
             ]
 
             price0 = (
                 (1 + mu)
                 * (
                     calculate_cost_g(
-                        c_greens[0], full_xs[0], delta_Es[0], E_greens[0], alpha_g
+                        c_greens[0], full_xs[0], delta_E, E_greens[0], alpha_g
                     )
                     + calculate_cost_b(
-                        c_browns[0], tax, full_xs[0], delta_Es[0], E_browns[0], alpha_b
+                        c_browns[0], tax, full_xs[0], delta_E, E_browns[0], alpha_b
                     )
                 )
                 / E_total
@@ -244,7 +243,7 @@ def calculate_utility(
                 calculate_numerator(
                     0,
                     full_xs[0],
-                    delta_Es[0],
+                    delta_E,
                     E_greens[0],
                     E_browns[0],
                     c_greens[0],
@@ -261,14 +260,13 @@ def calculate_utility(
             for j, t in enumerate(Ts):
                 Eg = E_greens[-1]
                 Eb = E_browns[-1]
-                delta_E = delta_Es[-1]
 
                 assert abs(E_total - (Eg + Eb)) / E_total < 1e-9
                 # Doyne equation 18
                 E_green_next = Eg * (1 - dg) + x * delta_E
                 # Doyne equation 19
                 E_brown_next = Eb * (1 - db) + (1 - x) * delta_E
-                delta_E_next = dg * E_green_next + db * E_brown_next
+                delta_E = dg * E_green_next + db * E_brown_next
 
                 x = full_xs[j + 1]
                 tax = taxes[j + 1]
@@ -277,11 +275,10 @@ def calculate_utility(
 
                 E_greens.append(E_green_next)
                 E_browns.append(E_brown_next)
-                delta_Es.append(delta_E_next)
                 numerator = calculate_numerator(
                     t - Tstart,
                     x,
-                    delta_E_next,
+                    delta_E,
                     E_green_next,
                     E_brown_next,
                     cg_next,
@@ -295,7 +292,7 @@ def calculate_utility(
                 denominator = (
                     math.exp(-rho * (t - Tstart))
                     * (cg_next * x + (cb_next + tax) * (1 - x))
-                    * delta_E_next
+                    * delta_E
                 )
                 denominators.append(denominator)
             sum_numerators = sum(numerators)
