@@ -139,9 +139,12 @@ def calculate_taxes(scenario, tax_initial, chi):
 
 def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0, alpha_g, alpha_b):
     # Discounted profit associated with year t + tau
-    cost_g = calculate_cost_g(cg, x, delta_E, Eg, alpha_g)
-    cost_b = calculate_cost_b(cb, tax, x, delta_E, Eb, alpha_b)
-    return math.exp(-rho * tau) * (max((p0 * Eg - cost_g + p0 * Eb - cost_b), 0))
+    supply = Eg + Eb
+    production_cost = calculate_cost_g(cg, x, delta_E, Eg, alpha_g) + calculate_cost_b(
+        cb, tax, x, delta_E, Eb, alpha_b
+    )
+    discount = math.exp(-rho * tau)
+    return discount * (max((p0 * supply - production_cost), 0))
 
 
 def plot_Evst_and_xs(E_browns, E_greens, initial, xs, brown_tech):
@@ -256,9 +259,7 @@ def calculate_utility(
 
             for j, t in enumerate(Ts):
                 Eg = E_greens[-1]
-                cg = c_greens[j]
                 Eb = E_browns[-1]
-                cb = c_browns[j]
                 delta_E = delta_Es[-1]
                 x = full_xs[j + 1]
                 tax = taxes[j + 1]
