@@ -27,6 +27,5 @@ Prepare a 5-to-7 minute PowerPoint presentation of your findings, with the follo
 
 ## Notes:
 
-* Do not fork this repository.
-* **DO NOT CHANGE THE CODE**. You do not need to look at the code either to complete the assignment.
+* You do not need to look at the code to complete the assignment.
 * You can look at the [default parameters](https://github.com/rht/climate_stress_test_energy_company/blob/main/default_parameters%20(read%20optionally).md) used for the model, but this is not necessary.
