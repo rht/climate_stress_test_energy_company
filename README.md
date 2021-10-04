@@ -1,5 +1,7 @@
 # Illustrative Exercise: Stress Testing an Energy Company (Stanford ECON 101: Climate Finance Fall 2021)
 
+This illustrative exercise is meant to help you get ideas for your own research project, and you can also use it as a basis for your own project, but is not obligatory (i.e. it does not count towards your grade).
+
 ## Step 1:
 
 Read the motivations for conducting a climate stress test of a firm ([pdf link](https://github.com/rht/climate_stress_test_energy_company/blob/main/pdfs/Motivation-for-Climate-Stress-Testing-Econ-101-Climate-Finance-Stanford-Fall-2021.pdf))
