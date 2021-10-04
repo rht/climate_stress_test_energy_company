@@ -1,4 +1,4 @@
-# Stress Testing an Energy Company
+# Illustrative Exercise: Stress Testing an Energy Company
 
 ## Step 1:
 

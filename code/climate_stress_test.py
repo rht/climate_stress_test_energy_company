@@ -14,7 +14,8 @@
 # ---
 
 # + cellView="form"
-#@title Climate Stress Testing an Energy Company
+#@title Illustrative Exercise: Stress Testing an Energy Company
+
 import math
 
 import ipywidgets as widgets
