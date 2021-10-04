@@ -219,6 +219,7 @@ def calculate_utility(
             # Time series of total depreciation of energy
             delta_Es = [dg * E_greens[0] + db * E_browns[0]]
             tax = taxes[0]
+            x = full_xs[0]
 
             # There is no need to discount the initial
             # denominator term because tau is 0 anyway.
@@ -261,8 +262,6 @@ def calculate_utility(
                 Eg = E_greens[-1]
                 Eb = E_browns[-1]
                 delta_E = delta_Es[-1]
-                x = full_xs[j + 1]
-                tax = taxes[j + 1]
 
                 assert abs(E_total - (Eg + Eb)) / E_total < 1e-9
                 # Doyne equation 18
@@ -271,6 +270,8 @@ def calculate_utility(
                 E_brown_next = Eb * (1 - db) + (1 - x) * delta_E
                 delta_E_next = dg * E_green_next + db * E_brown_next
 
+                x = full_xs[j + 1]
+                tax = taxes[j + 1]
                 cg_next = c_greens[j + 1]
                 cb_next = c_browns[j + 1]
 
