@@ -307,6 +307,48 @@ def calculate_numerator(tau, x, delta_E, Eg, Eb, cg, cb, tax, p0):
     return math.exp(-rho * tau) * (max((p0 * Eg - cost_g + p0 * Eb - cost_b), 0))
 
 
+def plot_Evst_and_xs(E_browns, E_greens, initial, xs):
+    fig, ax = plt.subplots(figsize=(9, 5))
+    fig.subplots_adjust(right=0.77)
+    ax.stackplot(
+        full_Ts,
+        [E_browns, E_greens],
+        labels=[f"Brown ({dropdown_brown.value})", f"Green ({green_tech})"],
+        colors=["tab:brown", "tab:green"],
+    )
+    ax.set_ylabel("Energy (GJ)")
+    ax.set_xlabel("Time (years)")
+    ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
+
+    ax2 = ax.twinx()
+    if not initial:
+        ax2.plot(
+            full_Ts,
+            100 * np.array([initial_x] + xs0),
+            label="Initial guess",
+            color="gray",
+            linewidth=2.0,
+        )
+        ax2.plot(
+            full_Ts,
+            100 * np.array([initial_x] + list(xs)),
+            label="Optimized",
+            color="black",
+            linewidth=2.0,
+        )
+    else:
+        ax2.plot(
+            full_Ts,
+            100 * np.array([initial_x] + xs0),
+            label="Current",
+            color="black",
+            linewidth=2.0,
+        )
+    ax2.set_ylabel("Investment in green energy x%")
+    ax2.set_ylim(0, 101)
+    fig.legend(loc=7)
+
+
 def calculate_utility(c_greens, c_browns, t_tax, plot_Evst=False, initial=False):
     def _calc_U(xs):
         Us = []
@@ -438,46 +480,7 @@ def calculate_utility(c_greens, c_browns, t_tax, plot_Evst=False, initial=False)
         # Else plot E vs t
         # First, print out the value of numerators
         print("$", round(np.mean(Vs) / 1000_000_000, 2), "billion")
-
-        fig, ax = plt.subplots(figsize=(9, 5))
-        fig.subplots_adjust(right=0.77)
-        ax.stackplot(
-            full_Ts,
-            [E_browns, E_greens],
-            labels=[f"Brown ({dropdown_brown.value})", f"Green ({green_tech})"],
-            colors=["tab:brown", "tab:green"],
-        )
-        ax.set_ylabel("Energy (GJ)")
-        ax.set_xlabel("Time (years)")
-        ax.set_ylim(0, int(1.01 * (E_browns[0] + E_greens[0])))
-
-        ax2 = ax.twinx()
-        if not initial:
-            ax2.plot(
-                full_Ts,
-                100 * np.array([initial_x] + xs0),
-                label="Initial guess",
-                color="gray",
-                linewidth=2.0,
-            )
-            ax2.plot(
-                full_Ts,
-                100 * np.array([initial_x] + list(xs)),
-                label="Optimized",
-                color="black",
-                linewidth=2.0,
-            )
-        else:
-            ax2.plot(
-                full_Ts,
-                100 * np.array([initial_x] + xs0),
-                label="Current",
-                color="black",
-                linewidth=2.0,
-            )
-        ax2.set_ylabel("Investment in green energy x%")
-        ax2.set_ylim(0, 101)
-        fig.legend(loc=7)
+        plot_Evst_and_xs(E_browns, E_greens, initial, xs)
         return out
 
     return _calc_U
