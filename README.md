@@ -31,4 +31,4 @@ Organize your findings using the following structure (see also instructions in p
 
 * You do not need to look at the code to complete the exercise.
 * You can fork the repo (i.e. copy the code) to adjust and/or extend it for your own research project, if you want to use this code as a basis.
-* You can look at the [default parameters](https://github.com/rht/climate_stress_test_energy_company/blob/main/default_parameters%20(read%20optionally).md) used for the model, but this is not necessary.
+* You can look at the [default parameters](https://github.com/rht/climate_stress_test_energy_company/blob/main/default_parameters%20(read%20optionally).md) used for the model, but this is not necessary. You are also free to adjust the parameters for your own research project.
